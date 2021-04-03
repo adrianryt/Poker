@@ -1,6 +1,6 @@
-from classes.deck import Deck
-from classes.player import Player
-from classes.card import Card
+from Poker.classes.deck import Deck
+from Poker.classes.player import Player
+from Poker.classes.card import Card
 from typing import List
 import math
 

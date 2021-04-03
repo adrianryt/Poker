@@ -1,7 +1,7 @@
-from classes.card import Card
+from card import Card
 
 
-def evel_hand(hand):  # hand - 5 cards form player
+def evel_hand(hand):  #7-cards
     NO_PAIR = 0
     PAIR = 1
     TWO_PAIR = 2
@@ -13,7 +13,24 @@ def evel_hand(hand):  # hand - 5 cards form player
     STRAIGHT_FLUSH = 8
     values = sorted([c.get_rank() for c in hand], reverse=True)
     suits = [c.get_suit() for c in hand]
-    straight = (values == [*range(max(values), min(values) - 1, -1)])
+    #looking for straight
+    straight = False
+    straight_counter = 1
+    straight_max_value = values[0]
+    for i in range(1, len(values)):
+        if values[i] == values[i - 1] - 1:
+            straight_counter +=1
+            if straight_counter == 5:
+                straight = True
+        elif values[i] != values[i - 1]:
+            straight_counter = 1
+            straight_max_value = values[i]
+
+    #looing for flush
+
+
+
+
     flush = all(s == suits[0] for s in suits)
 
     if straight and flush:
@@ -39,7 +56,7 @@ def evel_hand(hand):  # hand - 5 cards form player
         return FULL_HOUSE, value_of_three, pairs[0] # zwraca wage FULL_HOUSE, wage trojki oraz wage pary
     if flush:
         print("KOLOR")
-        return FLUSH, suits[0]
+        return FLUSH # nie opcji na 2 różno kolorowe flushe
     if straight:
         print("STRIT")
         return STRAIGHT, values[0] #zwraca wage STRAIGHT oraz najwyższa wartość
@@ -79,6 +96,11 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
                 same_hand_weight_list.append(_)
 
         # tutaj trzeba teraz ogarnac ify w zależnosci od maks value, bo każdy hand inaczej sie sprawdza
+        #STRAIGHT_FLUSH
+        if maks_value == 7:
+            winner = None
+            maks_card = -1
+
         #quads:
         if maks_value == 7:
             winner = None
@@ -87,7 +109,16 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
                 if evel_hand(players[i].cards + table_cards)[1] > maks_card:
                     maks_card = evel_hand(players[i].cards + table_cards)[1]
                     winner = i
-            return players[winner].id
+            res = []
+            res.append(players[winner])
+            return res
+
+        #flush:
+        if maks_value == 6:
+            res = []
+            for i in same_hand_weight_list:
+                res.append(players[i])
+            return res
 
         #Full House
         if maks_value == 5:
@@ -103,6 +134,9 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
                     if evel_hand(players[i].cards + table_cards)[2] > maks_pair_card:
                         maks_pair_card = evel_hand(players[i].cards + table_cards)[2]
                         winner = i
+            res = []
+            res.append(players[winner])
+            return res
             return players[winner].id
 
         #streight: #NIE ZROBIONE DO KONCA
@@ -159,10 +193,6 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
                     maks_card = evel_hand(players[i].cards + table_cards)[1]
                     winner = i
             return players[winner].id
-
-
-
-
 
 
 

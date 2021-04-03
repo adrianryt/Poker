@@ -1,6 +1,7 @@
 import random
 from classes.card import Card
 
+
 class Deck:
     def __init__(self):
         self.deck = [Card(rank, suit) for rank in range(2, 15) for suit in range(0, 4)]
