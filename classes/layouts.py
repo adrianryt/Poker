@@ -7,71 +7,132 @@ def evel_hand(hand):  #7-cards
     TWO_PAIR = 2
     TRIPS = 3
     STRAIGHT = 4
-    FULL_HOUSE = 5
-    FLUSH = 6
+    FLUSH = 5
+    FULL_HOUSE = 6
     QUADS = 7
     STRAIGHT_FLUSH = 8
+
+    sorted_cards = sorted([cards for cards in hand], key=lambda cards: cards.get_rank(), reverse=True)
     values = sorted([c.get_rank() for c in hand], reverse=True)
-    suits = [c.get_suit() for c in hand]
-    #looking for straight
-    straight = False
-    straight_counter = 1
-    straight_max_value = values[0]
-    for i in range(1, len(values)):
-        if values[i] == values[i - 1] - 1:
-            straight_counter +=1
-            if straight_counter == 5:
-                straight = True
-        elif values[i] != values[i - 1]:
-            straight_counter = 1
-            straight_max_value = values[i]
 
-    #looing for flush
+    #looking for poker
+    poker_counter = 1
+    res_cards = [sorted_cards[0]]
+    for i in range(1, len(sorted_cards)):
+        if sorted_cards[i].get_rank() == sorted_cards[i-1].get_rank() -1 and sorted_cards[i].get_suit() == sorted_cards[i-1].get_suit():
+            poker_counter += 1
+            res_cards.append(sorted_cards[i])
+            if poker_counter == 5:
+                return STRAIGHT_FLUSH, res_cards
+        elif sorted_cards[i].get_rank() != sorted_cards[i-1].get_rank():
+            poker_counter = 1
+            res_cards = [sorted_cards[i]]
 
+    #looking for Quads
+    quads_counter = 1
+    res_cards = [sorted_cards[0]]
+    quads_value = sorted_cards[0].get_rank()
+    for i in range(1, len(sorted_cards)):
+        if sorted_cards[i].get_rank() == sorted_cards[i-1].get_rank():
+            quads_value = sorted_cards[i].get_rank()
+            quads_counter+=1
+            res_cards.append(sorted_cards[i])
+            if(quads_counter == 4):
+                for card in sorted_cards:
+                    if card not in res_cards:
+                        res_cards.append(card)
+                        break
+                return QUADS, res_cards
+        else:
+            quads_counter = 1
+            res_cards = [sorted_cards[i]]
+            quads_value = sorted_cards[i].get_rank()
 
-
-
-    flush = all(s == suits[0] for s in suits)
-
-    if straight and flush:
-        print("poker")
-        return STRAIGHT_FLUSH, max(values), suits[0]
 
     pairs = []
     three_same_valued_cards = False
-    pair_present = False
     value_of_three = None
-    for v in set(values):
-        if values.count(v) == 4:
-            print("kareta")
-            return QUADS, values[0]
-        if values.count(v) == 3:
+    value_set = sorted(set(values), reverse=True)
+    for v in value_set:
+        if values.count(v) == 3 and not three_same_valued_cards:
             three_same_valued_cards = True
             value_of_three = v
-        if values.count(v) == 2:
-            pair_present = True
+        elif values.count(v) >= 2:
             pairs.append(v)
-    if three_same_valued_cards and pair_present: # we found FULL_HOUSE
-        print("FULL")
-        return FULL_HOUSE, value_of_three, pairs[0] # zwraca wage FULL_HOUSE, wage trojki oraz wage pary
-    if flush:
-        print("KOLOR")
-        return FLUSH # nie opcji na 2 różno kolorowe flushe
-    if straight:
-        print("STRIT")
-        return STRAIGHT, values[0] #zwraca wage STRAIGHT oraz najwyższa wartość
-    if three_same_valued_cards:
-        print("TRÓJKA")
-        return TRIPS, value_of_three
-    if len(pairs) == 2:
-        print("DWIE PARY")
-        return TWO_PAIR, pairs[1], pairs[0] #zwraca wage podwójnej pary, wagę karty większej pary oraz wagę karty mniejszej pary, ewentualnie zamiast max i min dać pairs[0] i pairs[1] bo są posortowane chyba
-    if len(pairs) == 1:
-        print("PARA")
-        return PAIR, pairs[0]
 
-    print("NAJWIEKSZA KARTA")
-    return NO_PAIR, values[0]
+    #looking for full
+    if three_same_valued_cards and len(pairs) > 0:
+        print("FULL")
+        res_cards = []
+        for card in sorted_cards:
+            if card.get_rank() == value_of_three:
+                res_cards.append(card)
+        for card in sorted_cards:
+            if card.get_rank() == max(pairs):
+                res_cards.append(card)
+
+        return FULL_HOUSE, res_cards
+
+    # looking for flush
+    suits = [[] for i in range(4)]
+    for c in sorted_cards:
+        suits[c.get_suit()].append(c)
+    for s in suits:
+        if len(s) == 5:
+            return FLUSH, s
+
+    # looking for straight
+    straight_counter = 1
+    res_cards = [sorted_cards[0]]
+    straight_max_value = values[0]
+    for i in range(1, len(sorted_cards)):
+        if sorted_cards[i].get_rank() == sorted_cards[i-1].get_rank() - 1:
+            straight_counter += 1
+            res_cards.append(sorted_cards[i])
+            if straight_counter == 5:
+                return STRAIGHT, res_cards
+        elif sorted_cards[i].get_rank() != sorted_cards[i-1].get_rank():
+            straight_counter = 1
+            res_cards = [sorted_cards[i]]
+
+    #looking for TRIPS
+    if three_same_valued_cards:
+        res_cards = []
+        for card in sorted_cards:
+            if card.get_rank() == value_of_three:
+                res_cards.append(card)
+        for card in sorted_cards:
+            if card not in res_cards:
+                res_cards.append(card)
+                if len(res_cards) == 5: break
+        return TRIPS, res_cards
+
+    if len(pairs) >= 2:
+        res_cards = []
+        for card in sorted_cards:
+            if card.get_rank() == pairs[0]:
+                res_cards.append(card)
+        for card in sorted_cards:
+            if card.get_rank() == pairs[1]:
+                res_cards.append(card)
+        for card in sorted_cards:
+            if card not in res_cards:
+                res_cards.append(card)
+                break
+        return TWO_PAIR, res_cards
+
+    if len(pairs) == 1:
+        res_cards = []
+        for card in sorted_cards:
+            if card.get_rank() == pairs[0]:
+                res_cards.append(card)
+        for card in sorted_cards:
+            if card not in res_cards:
+                res_cards.append(card)
+                if(len(res_cards) == 5): break
+        return PAIR, res_cards
+
+    return NO_PAIR, [x for x in sorted_cards[0:5]]
 
 
 
@@ -84,6 +145,7 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
     #print(table_cards + players[j].cards) sprawdzic czy dziala
     for j in range(len(players)):
         players_hand_value.append(evel_hand(table_cards + players[j].cards)[0])
+
     maks_value = max(players_hand_value)
 
     if(players_hand_value.count(maks_value) == 1):
@@ -95,7 +157,7 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
             if players_hand_value(_) == maks_value:
                 same_hand_weight_list.append(_)
 
-        # tutaj trzeba teraz ogarnac ify w zależnosci od maks value, bo każdy hand inaczej sie sprawdza
+
         #STRAIGHT_FLUSH
         if maks_value == 7:
             winner = None
@@ -197,15 +259,24 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
 
 
 if __name__ == "__main__":
-    card1 = Card(10, 3)
-    card2 = Card(10, 3)
-    card3 = Card(10, 2)
-    card4 = Card(10, 0)
-    card5 = Card(11, 1)
+    card1 = Card(13, 1)
+    card2 = Card(3, 1)
+    card3 = Card(7, 0)
+    card4 = Card(9, 2)
+    card5 = Card(10, 1)
+    card6 = Card(2, 2)
+    card7 = Card(12, 3)
     hand = []
+    table = []
     hand.append(card1)
     hand.append(card2)
     hand.append(card3)
     hand.append(card4)
     hand.append(card5)
-    print(evel_hand(hand)[0])
+    hand.append(card6)
+    hand.append(card7)
+    res = evel_hand(hand)
+    print(res[0])
+    for c in res[1]:
+        print(c)
+
