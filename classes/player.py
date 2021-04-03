@@ -1,4 +1,4 @@
-from Poker.classes.card import Card
+from classes.card import Card
 
 
 class Player:

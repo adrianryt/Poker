@@ -1,4 +1,4 @@
-from card import Card
+from classes.card import Card
 
 
 def evel_hand(hand):  #7-cards
