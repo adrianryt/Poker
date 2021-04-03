@@ -32,6 +32,14 @@ class Card:
     def __str__(self):
         return "({0} , {1})".format(Card.RANKS[self.val >> 2], Card.SUITS[self.val & 3])
 
+    def __repr__(self):
+        return "({0} , {1})".format(Card.RANKS[self.val >> 2], Card.SUITS[self.val & 3])
+
+    def __eq__(self, other):
+        if not isinstance(other, Card):
+            return NotImplemented
+        return self.val == other.val
+
     def get_rank(self):
         return self.val >> 2
 
