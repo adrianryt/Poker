@@ -30,10 +30,10 @@ class Player:
         return self.cards[0], self.cards[1]
 
     def __repr__(self):
-        return "Name: {0}\n Id: {1}\n Tokens: {2}\n Cards: {3} {4}".format(self.name, self.id, self.tokens,
+        return "(Name: {0}, Id: {1}, Tokens: {2}, Cards: {3} {4})".format(self.name, self.id, self.tokens,
                                                                            self.get_cards()[0], self.get_cards()[1])
     def __str__(self):
-        return "Name: {0}\n Id: {1}\n Tokens: {2}\n Cards: {3} {4}".format(self.name, self.id, self.tokens,
+        return "(Name: {0}, Id: {1}, Tokens: {2}, Cards: {3} {4})".format(self.name, self.id, self.tokens,
                                                                            self.get_cards()[0], self.get_cards()[1])
 
 

@@ -27,17 +27,29 @@ class Table:
         for winner in winnners:
             tokens_to_add = math.floor((winner.tokens_in_pool / tokens_added_bw) * self.pool)
             winner.add_tokens(tokens_to_add)
+        self.pool = 0
 
     def deal_cards_players(self):
         for player in self.players:
             cards = self.deck.pop_cards(2)
             player.add_cards(cards)
 
+    def remove_cards_players(self):
+        for player in self.players:
+            player.remove_cards()
+
     def deal_flop(self):
         self.tableCards.extend(self.deck.pop_cards(3))
 
     def deal_turn_river(self):
         self.tableCards.append(self.deck.pop_card())
+
+    def remove_cards_table(self):
+        self.tableCards.clear()
+
+    def move_dealer(self):
+        tmp = self.players.pop(0)
+        self.players.append(tmp)
 
 
 
