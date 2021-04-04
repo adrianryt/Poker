@@ -1,6 +1,29 @@
 from classes.card import Card
 from classes.player import Player
 
+def straight_flush_5_A(hand):
+    suits = [[] for _ in range(4)]
+    for c in hand:
+        suits[c.get_suit()].append(c)
+    for suited_cards in suits:
+        if len(suited_cards) >= 5 and straight_5_A(suited_cards):
+            return straight_5_A(suited_cards)
+    return False
+
+def straight_5_A(hand):
+    ranks = [x.get_rank() for x in hand]
+    if 5 in ranks and 4 in ranks and 3 in ranks and 2 in ranks and 14 in ranks:
+
+        result = [card for card in hand if card.get_rank() == 5 or card.get_rank() == 4 or card.get_rank() == 3
+                  or card.get_rank() == 2 or card.get_rank() == 14]
+        result = list({card.get_rank(): card for card in result}.values())
+        result = sorted([cards for cards in result], key=lambda cards: cards.get_rank(), reverse=True)
+        ace = result.pop(0)
+        result.append(ace)
+        return result
+
+    return False
+
 
 
 def evel_hand(hand):  #7-cards
@@ -35,6 +58,9 @@ def evel_hand(hand):  #7-cards
                 elif tmp[j].get_rank() != tmp[j - 1].get_rank():
                     res_cards = [suits[sorted_cards[i].get_suit()][j]]
 
+    #looking for straight_flush from 5 to A
+    if straight_flush_5_A(sorted_cards):
+        return STRAIGHT_FLUSH, straight_flush_5_A(sorted_cards)
 
     #looking for Quads
     quads_counter = 1
@@ -99,6 +125,9 @@ def evel_hand(hand):  #7-cards
         elif sorted_cards[i].get_rank() != sorted_cards[i-1].get_rank():
             straight_counter = 1
             res_cards = [sorted_cards[i]]
+
+    if straight_5_A(sorted_cards):
+        return STRAIGHT, straight_5_A(sorted_cards)
 
     #looking for TRIPS
     if three_same_valued_cards:
@@ -199,14 +228,14 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
 if __name__ == "__main__":
 
     card1 = Card(14, 1)
-    card2 = Card(13, 1)
-    card3 = Card(10, 1)
-    card4 = Card(3, 1)
+    card2 = Card(2, 1)
+    card3 = Card(3, 1)
+    card4 = Card(9, 1)
     card5 = Card(2, 2)
 
 
-    card6 = Card(6, 2)
-    card7 = Card(12, 2)
+    card6 = Card(4, 1)
+    card7 = Card(5, 1)
     card8 = Card(4,3)
     card9 = Card(5,2)
     player1 = Player(100, 0, "lolo")
