@@ -67,6 +67,13 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual([player2], point_the_winner([player1, player2, player3], table))
         for p in players: p.remove_cards()
 
+        table = [Card(10, 0), Card(14, 3), Card(5, 3), Card(8, 1), Card(2, 2)]
+        player1.add_cards([Card(13, 3), Card(14, 2)])
+        player2.add_cards([Card(10, 1), Card(10, 2)])
+        player3.add_cards([Card(4, 3), Card(3, 3)])
+        self.assertEqual([player3], point_the_winner([player1, player2, player3], table))
+        for p in players: p.remove_cards()
+
 
 
 
