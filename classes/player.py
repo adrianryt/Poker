@@ -29,6 +29,23 @@ class Player:
             return "None", "None"
         return self.cards[0], self.cards[1]
 
+    def check(self):
+        pass
+
+    def call(self, table):
+        tokens_to_add = table.game_info.biggest_bet - self.tokens_in_pool
+        table.add_to_pool(tokens_to_add, self)
+        return tokens_to_add
+
+    def raisee(self, table, tokens):
+        tokens -= self.call(table)
+        table.add_to_pool(tokens, self)
+        table.game_info.update_b_b(tokens)
+
+    def fold(self, table):
+        table.players_in_round.remove(self)
+
+
     def __repr__(self):
         return "(Name: {0}, Id: {1}, Tokens: {2}, Cards: {3} {4})".format(self.name, self.id, self.tokens,
                                                                            self.get_cards()[0], self.get_cards()[1])
