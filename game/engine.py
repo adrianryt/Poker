@@ -53,7 +53,7 @@ def main():
         if len(players_left_in_round) > 1:
             players_number = len(players_left_in_round)
             for idx, p in enumerate(itertools.cycle(game_room.players), 1):
-                if p in players_left_in_round and idx != 1 and idx != 2:
+                if p in players_left_in_round and idx != 1 and idx != 2 and len(players_left_in_round) > 1:
                     print(p)
                     print(p.tokens_in_pool)
                     what_to_do = input()
@@ -71,7 +71,7 @@ def main():
         if len(players_left_in_round) > 1:
             players_number = len(players_left_in_round)
             for idx, p in enumerate(itertools.cycle(game_room.players), 1):
-                if p in players_left_in_round:
+                if p in players_left_in_round and len(players_left_in_round) > 1:
                     print(p)
                     print(p.tokens_in_pool)
                     what_to_do = input()
@@ -89,7 +89,7 @@ def main():
         if len(players_left_in_round) > 1:
             players_number = len(players_left_in_round)
             for idx, p in enumerate(itertools.cycle(game_room.players), 1):
-                if p in players_left_in_round:
+                if p in players_left_in_round and len(players_left_in_round) > 1:
                     print(p)
                     print(p.tokens_in_pool)
                     what_to_do = input()
@@ -106,7 +106,7 @@ def main():
         if len(players_left_in_round) > 1:
             players_number = len(players_left_in_round)
             for idx, p in enumerate(itertools.cycle(game_room.players), 1):
-                if p in players_left_in_round:
+                if p in players_left_in_round and len(players_left_in_round) > 1:
                     print(p)
                     print(p.tokens_in_pool)
                     what_to_do = input()
