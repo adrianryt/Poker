@@ -34,9 +34,11 @@ class Table:
             cards = self.deck.pop_cards(2)
             player.add_cards(cards)
 
+    #przy usuwaniu kart trzeba wyzerowac tokens_in_pool
     def remove_cards_players(self):
         for player in self.players:
             player.remove_cards()
+            player.tokens_in_pool = 0
 
     def deal_flop(self):
         self.tableCards.extend(self.deck.pop_cards(3))
