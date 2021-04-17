@@ -39,7 +39,7 @@ def main():
                     what_to_do = input()
                     if what_to_do == "fold":
                         p.fold(game_room)
-                    if what_to_do == "raise":
+                    if what_to_do == "raise": #robienie na stole/allin
                         p.raisee(game_room, 100)
                     if what_to_do == "check":
                         p.check()
