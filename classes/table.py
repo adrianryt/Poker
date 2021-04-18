@@ -69,6 +69,7 @@ class Table:
             self.players_in_round = [p for p in self.players_in_round if p.tokens_in_pool > 0]
             print(self.players_in_round)
             print(self.pool)
+            return winners
 
 
 
