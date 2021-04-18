@@ -6,7 +6,7 @@ HEADER = 64
 PORT = 5051
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.56.1"
+SERVER = "192.168.65.183"
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,6 +26,7 @@ def recive_pickle():
         msg_length = int(msg_length)
         msg = client.recv(msg_length)
         return pickle.loads(msg)
+
 
 def recive():
     msg_length = client.recv(HEADER).decode(FORMAT)

@@ -67,8 +67,8 @@ class Table:
             # for p in self.players_in_round:
             #     p.tokens_in_pool -= minimal_bet
             self.players_in_round = [p for p in self.players_in_round if p.tokens_in_pool > 0]
-            print(self.players_in_round)
-            print(self.pool)
+            #print(self.players_in_round)
+            #print(self.pool)
             return winners
 
 

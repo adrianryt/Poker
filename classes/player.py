@@ -45,6 +45,8 @@ class Player:
     def fold(self, table):
         table.players_in_round.remove(self)
 
+    def allIn(self,table):
+        self.raisee(table,self.tokens)
 
     def __repr__(self):
         return "(Name: {0}, Id: {1}, Tokens: {2}, Cards: {3} {4})".format(self.name, self.id, self.tokens,

@@ -3,6 +3,7 @@ import threading
 from classes.table import Table
 from classes.layouts import *
 from classes.game_info import GameInfo
+from classes.limited_player import LimitedPlayer
 import itertools
 import pickle
 
@@ -56,54 +57,77 @@ def start():
             player = Player(1000, idx, nick)
             game_table.add_player(player)
             conn_dict[idx] = conn
-        print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
+        print(f"[ACTIVE CONNECTIONS] {len(conn_dict)}")
         idx+=1
         if len(conn_dict) == LIMIT:
             return
 
+#def sendToAllPlayers():
+    #for conn in conn_dict:
+        #conn.send("Msg to all".encode(FORMAT))
 
-def sendToAllPlayers():
-    for conn in conn_dict:
-        conn.send("Msg to all".encode(FORMAT))
+def send_pickle(player,msg): #(do kogo, co)
+    bin = recive(conn_dict[player.id])
+    msg_to_client = pickle.dumps(msg)
+    msg_to_client = bytes(f'{len(msg_to_client):<{HEADER}}', "utf-8") + msg_to_client
+    conn_dict[player.id].send(msg_to_client)
 
 def sendCardsOnTable(players):
     for p in players:
         send(conn_dict[p.id], "CARDS")
-        bin = recive(conn_dict[p.id])
-        msg_to_client = pickle.dumps(game_table.tableCards)
-        msg_to_client = bytes(f'{len(msg_to_client):<{HEADER}}', "utf-8") + msg_to_client
-        conn_dict[p.id].send(msg_to_client)
+        send_pickle(p,game_table.tableCards) #do kogo oraz co wysyłamy
 
 def sendClientData(players):
-    for player in players:
-        send(conn_dict[player.id], "YOUR PLAYER")
-        bin = recive(conn_dict[player.id])
-        msg_to_client = pickle.dumps(player)
-        msg_to_client = bytes(f'{len(msg_to_client):<{HEADER}}', "utf-8") + msg_to_client
-        conn_dict[player.id].send(msg_to_client)
-
+    for p in players:
+        send(conn_dict[p.id], "YOUR PLAYER")
+        send_pickle(p,p)
 
 def sendDataToRivals(players, client):
     rivals = [p for p in players if p.id != client.id]
     for r in rivals:
         send(conn_dict[r.id], "OPPONENT")
-        bin = recive(conn_dict[r.id])
-        #powinnismy wysylac tylko info dotyczace nazwy gracza, jego zetonow, i zetonow w puli
-        #narazie wysylam wszystkie informacje o graczu
-        msg_to_client = pickle.dumps(client)
-        msg_to_client = bytes(f'{len(msg_to_client):<{HEADER}}', "utf-8") + msg_to_client
-        conn_dict[r.id].send(msg_to_client)
-
+        tmp = LimitedPlayer(client)
+        send_pickle(r,tmp)
 
 def sendWhoWon(players, winners):
+    tmp =[]
+    for winner in winners:
+        tmp.append(LimitedPlayer(winner))
     for p in players:
         send(conn_dict[p.id], "WINNERS")
-        bin = recive(conn_dict[p.id])
-        # powinnismy wysylac tylko info dotyczace nazwy gracza, jego zetonow, i zetonow w puli
-        # narazie wysylam wszystkie informacje o graczu
-        msg_to_client = pickle.dumps(winners)
-        msg_to_client = bytes(f'{len(msg_to_client):<{HEADER}}', "utf-8") + msg_to_client
-        conn_dict[p.id].send(msg_to_client)
+        send_pickle(p,tmp)
+
+def round_action(p):
+    send(conn_dict[p.id], "CHOOSE MOVE")
+    what_to_do = recive(conn_dict[p.id])
+    if what_to_do == "fold":
+        p.fold(game_table)
+    if what_to_do == "raise":
+        p.raisee(game_table, 100)
+    if what_to_do == "check":
+        p.check()
+    if what_to_do == "call":
+        p.call(game_table)
+    if what_to_do == "allIn":
+        p.allIn(game_table)
+
+    sendClientData([p])  # po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.
+    sendDataToRivals(game_table.players, p)
+
+def make_round():
+    players_number = len(game_table.players)
+    for idx, p in enumerate(itertools.cycle(game_table.players), 1):
+        if p in game_table.players_in_round and len(game_table.players_in_round) > 1:
+            round_action(p)
+        if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
+               game_table.players_in_round) and idx >= players_number:
+            break
+
+#Uwagi do silnika:
+#1.Raise do danej ilości mamony i żeby nie przekraczało obecnie posiadanej
+#2.Check musi być czasami wyłączony - chyba da się to zrobić sprawdzając czy poprzedni gracz ma tyle samo "token_in_pool" co gracz na ruchu
+#3.Opcja allIn - On powinien cały czas być w grze ale już mi się łeb kopci i nie wiem
+
 
 def engine():
     while True:
@@ -120,94 +144,33 @@ def engine():
             players_number = len(game_table.players)
             for idx, p in enumerate(itertools.cycle(game_table.players), 1):
                 if p in game_table.players_in_round and idx != 1 and idx != 2 and len(game_table.players_in_round) > 1:
-                    send(conn_dict[p.id], "CHOOSE MOVE")
-                    what_to_do = recive(conn_dict[p.id])
-                    print(what_to_do)
-                    if what_to_do == "fold":
-                        p.fold(game_table)
-                    if what_to_do == "raise":  # robienie na stole/allin
-                        p.raisee(game_table, 100)
-                    if what_to_do == "check":
-                        p.check()
-                    if what_to_do == "call":
-                        p.call(game_table)
-                    sendClientData([p]) #po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.
-                    sendDataToRivals(game_table.players, p)
+                   round_action(p)
                 if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
                        game_table.players_in_round) and idx >= players_number + 2:
                     break
 
-        game_table.deal_flop()
         print("AFTER FLOP (3karty pokazane na stole)")
+        game_table.deal_flop()
         sendCardsOnTable(game_table.players)
         print(game_table.players_in_round)
         if len(game_table.players_in_round) > 1:
-            players_number = len(game_table.players)
-            for idx, p in enumerate(itertools.cycle(game_table.players), 1):
-                if p in game_table.players_in_round and len(game_table.players_in_round) > 1:
-                    send(conn_dict[p.id], "CHOOSE MOVE")
-                    what_to_do = recive(conn_dict[p.id])
-                    if what_to_do == "fold":
-                        p.fold(game_table)
-                    if what_to_do == "raise":
-                        p.raisee(game_table, 100)
-                    if what_to_do == "check":
-                        p.check()
-                    if what_to_do == "call":
-                        p.call(game_table)
-                    sendClientData([p])  # po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.
-                    sendDataToRivals(game_table.players, p)
-                if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
-                       game_table.players_in_round) and idx >= players_number:
-                    break
-        game_table.deal_turn_river()
-        sendCardsOnTable(game_table.players)
+            make_round()
+
         print("AFTER TURN (kolejna karta na stole)")
-        if len(game_table.players_in_round) > 1:
-            players_number = len(game_table.players)
-            for idx, p in enumerate(itertools.cycle(game_table.players), 1):
-                if p in game_table.players_in_round and len(game_table.players_in_round) > 1:
-                    send(conn_dict[p.id], "CHOOSE MOVE")
-                    what_to_do = recive(conn_dict[p.id])
-                    if what_to_do == "fold":
-                        p.fold(game_table)
-                    if what_to_do == "raise":
-                        p.raisee(game_table, 100)
-                    if what_to_do == "check":
-                        p.check()
-                    if what_to_do == "call":
-                        p.call(game_table)
-                    sendClientData([p])  # po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.
-                    sendDataToRivals(game_table.players, p)
-                if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
-                       game_table.players_in_round) and idx >= players_number:
-                    break
         game_table.deal_turn_river()
         sendCardsOnTable(game_table.players)
-        print("AFTER RIVER (kolejna karta na stole)")
         if len(game_table.players_in_round) > 1:
-            players_number = len(game_table.players)
-            for idx, p in enumerate(itertools.cycle(game_table.players), 1):
-                if p in game_table.players_in_round and len(game_table.players_in_round) > 1:
-                    send(conn_dict[p.id], "CHOOSE MOVE")
-                    what_to_do = recive(conn_dict[p.id])
-                    if what_to_do == "fold":
-                        p.fold(game_table)
-                    if what_to_do == "raise":
-                        p.raisee(game_table, 100)
-                    if what_to_do == "check":
-                        p.check()
-                    if what_to_do == "call":
-                        p.call(game_table)
-                    sendClientData([p])  # po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.
-                    sendDataToRivals(game_table.players, p)
-                if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
-                       game_table.players_in_round) and idx >= players_number:
-                    break
+           make_round()
+
+        print("AFTER RIVER (kolejna karta na stole)")
+        game_table.deal_turn_river()
+        sendCardsOnTable(game_table.players)
+        if len(game_table.players_in_round) > 1:
+            make_round()
+
         winners = game_table.reveal_winners()
         sendWhoWon(game_table.players, winners)
         game_table.new_round()
-
 
 if __name__ == "__main__":
     print("[STARTING] server is starting...")
