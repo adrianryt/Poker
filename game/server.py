@@ -66,39 +66,54 @@ def start():
     #for conn in conn_dict:
         #conn.send("Msg to all".encode(FORMAT))
 
+
+def wrap_message(type, msg): #string oraz coś co chcemy do message włożyć
+    result = (type, msg)
+    return result
+
 def send_pickle(player,msg): #(do kogo, co)
-    bin = recive(conn_dict[player.id])
+    #bin = recive(conn_dict[player.id])
     msg_to_client = pickle.dumps(msg)
     msg_to_client = bytes(f'{len(msg_to_client):<{HEADER}}', "utf-8") + msg_to_client
     conn_dict[player.id].send(msg_to_client)
 
 def sendCardsOnTable(players):
     for p in players:
-        send(conn_dict[p.id], "CARDS")
-        send_pickle(p,game_table.tableCards) #do kogo oraz co wysyłamy
+        #send(conn_dict[p.id], "CARDS")
+        #send_pickle(p,game_table.tableCards) #do kogo oraz co wysyłamy
+        wrapped_msg = wrap_message("CARDS", game_table.tableCards)
+        send_pickle(p, wrapped_msg)
 
 def sendClientData(players):
     for p in players:
-        send(conn_dict[p.id], "YOUR PLAYER")
-        send_pickle(p,p)
+        #send(conn_dict[p.id], "YOUR PLAYER")
+        #send_pickle(p, p)
+        wrapped_msg = wrap_message("YOUR PLAYER", p)
+        send_pickle(p, wrapped_msg)
 
 def sendDataToRivals(players, client):
     rivals = [p for p in players if p.id != client.id]
     for r in rivals:
-        send(conn_dict[r.id], "OPPONENT")
+        #send(conn_dict[r.id], "OPPONENT")
         tmp = LimitedPlayer(client)
-        send_pickle(r,tmp)
+        wrapped_msg = wrap_message("OPPONENT", tmp)
+        #send_pickle(r,tmp)
+        send_pickle(r, wrapped_msg)
 
 def sendWhoWon(players, winners):
     tmp =[]
     for winner in winners:
         tmp.append(LimitedPlayer(winner))
     for p in players:
-        send(conn_dict[p.id], "WINNERS")
-        send_pickle(p,tmp)
+        #send(conn_dict[p.id], "WINNERS")
+        #send_pickle(p,tmp)
+        wrapped_msg = wrap_message("WINNERS", tmp)
+        send_pickle(p, wrapped_msg)
 
 def round_action(p):
-    send(conn_dict[p.id], "CHOOSE MOVE")
+    #send(conn_dict[p.id], "CHOOSE MOVE")
+    wrapped_msg = wrap_message("CHOOSE MOVE", p)
+    send_pickle(p, wrapped_msg)
     what_to_do = recive(conn_dict[p.id])
     if what_to_do == "fold":
         p.fold(game_table)
