@@ -46,6 +46,9 @@ class Card:
     def get_suit(self):
         return self.val & 3
 
+    def get_card_in_int(self):
+        return self.val
+
     def get_rank_to_str(self):
         return self.RANKS[self.get_rank()]
 

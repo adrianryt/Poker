@@ -1,6 +1,7 @@
 import socket
 import threading
 import pickle
+from view.game_window import game_window
 
 HEADER = 64
 PORT = 5051
@@ -11,6 +12,8 @@ ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
+
+game_window = game_window()
 
 def send(msg):
     message = msg.encode(FORMAT)
@@ -35,48 +38,31 @@ def recive():
         # przydolby sie usuwac z dicta rozlaczonego gracza
         client.close()
     elif wrapped_msg[0] == "YOUR PLAYER":
+        game_window.player = wrapped_msg[1]
         print(wrapped_msg[1])
     elif wrapped_msg[0] == "CHOOSE MOVE":
         print("Co robisz?")
-        send(input())
-    elif wrapped_msg[0] == "OPPONENT":
+        game_window.reset_buttons()
+        while game_window.ACTION == None:
+            pass
+        send(game_window.ACTION)
+        game_window.ACTION = None
+
+    elif wrapped_msg[0] == "OPPONENT": #dostajemy info o jednym oponencie
+        game_window.update_opponent(wrapped_msg[1])
+        print(wrapped_msg[1])
+    elif wrapped_msg[0] == "OPPONENTS":  # dostajemy info o wszystkich oponentach
+        game_window.opponents = wrapped_msg[1]
         print(wrapped_msg[1])
     elif wrapped_msg[0] == "CARDS":
+        game_window.tableCards = wrapped_msg[1]
         print(wrapped_msg[1])
     elif wrapped_msg[0] == "WINNERS":
         print("WINNERS:")
+        game_window.tableCards = None
         print(wrapped_msg[1])
     else:
         return wrapped_msg[0]
-
-
-#def recive():
-   # msg_length = client.recv(HEADER).decode(FORMAT)
-   # if msg_length:
-     #   msg_length = int(msg_length)
-       # msg = client.recv(msg_length).decode(FORMAT)
-       # if msg == DISCONNECT_MESSAGE:
-       #     client.send("Leaving message".encode(FORMAT))
-            # przydolby sie usuwac z dicta rozlaczonego gracza
-         #   client.close()
-      #  elif msg == "YOUR PLAYER":
-         #   send("OK waiting for it")
-         #   print(recive_pickle())
-       # elif msg == "CHOOSE MOVE":
-        #    print("Co robisz?")
-        #    send(input())
-       # elif msg == "OPPONENT":
-        #    send("OK gimme his info")
-        #    print(recive_pickle())
-      #  elif msg == "CARDS":
-        #    send("OK gimmie info about cards")
-         #   print(recive_pickle())
-      #  elif msg == "WINNERS":
-        #    send("OK gimmie info who won")
-        #    print(recive_pickle())
-       # else:
-      #      return msg
-
 
 
 def listening():
@@ -84,10 +70,10 @@ def listening():
         recive()
 
 
-
-connected = True
-thread = threading.Thread(target=listening, args=())
-thread.start()
-nick = str(input("Podaj nick: "))
-send(nick)
-
+if __name__ == "__main__":
+    connected = True
+    thread = threading.Thread(target=listening, args=())
+    thread.start()
+    nick = str(input("Podaj nick: "))
+    send(nick)
+    game_window.main()

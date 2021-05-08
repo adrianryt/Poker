@@ -1,4 +1,5 @@
 from classes.player import Player
+
 class LimitedPlayer:
     def __init__(self, player):
         self.tokens = player.tokens

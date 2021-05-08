@@ -110,6 +110,20 @@ def sendWhoWon(players, winners):
         wrapped_msg = wrap_message("WINNERS", tmp)
         send_pickle(p, wrapped_msg)
 
+def sendRivalsData(players):
+    players_dict = {}
+    for player in players:
+        players_dict[player.id] = player
+
+    for player in players:
+        players_dict.pop(player.id)
+        for key, val in players_dict.items():
+            pass;
+        wrapped_msg = wrap_message("OPPONENTS",players_dict)
+        send_pickle(player, wrapped_msg)
+        players_dict[player.id] = player
+
+
 def round_action(p):
     #send(conn_dict[p.id], "CHOOSE MOVE")
     wrapped_msg = wrap_message("CHOOSE MOVE", p)
@@ -154,6 +168,7 @@ def engine():
         # na poczatek zawsze rozdajemy karty graczom
         game_table.deal_cards_players()
         sendClientData(game_table.players)
+        sendRivalsData(game_table.players)
         # te petle to te rozdania
         if len(game_table.players_in_round) > 1:
             players_number = len(game_table.players)
