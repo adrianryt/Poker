@@ -7,13 +7,15 @@ HEADER = 64
 PORT = 5051
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.65.183"
+SERVER = "192.168.0.52"
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
 game_window = game_window()
+
+
 
 def send(msg):
     message = msg.encode(FORMAT)
@@ -74,6 +76,6 @@ if __name__ == "__main__":
     connected = True
     thread = threading.Thread(target=listening, args=())
     thread.start()
-    nick = str(input("Podaj nick: "))
+    nick = game_window.login()
     send(nick)
     game_window.main()

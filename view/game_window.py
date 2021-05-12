@@ -1,5 +1,6 @@
 import pygame
 import os
+import math
 from view.button import button
 import sys
 from io import StringIO
@@ -23,18 +24,23 @@ cardDict = {None: 'red_joker.png', 8:'2_of_spades.png',9: '2_of_clubs.png',10: '
 
 class game_window:
     def __init__(self):
+        pygame.init()
         self.WIDTH = 1200
         self.HEIGHT = 700
-        self.FPS = 5
+        self.FPS = 60
         self.BACKGROUND = (241,245,215)
         self.WHITE = (255,255,255)
         self.BLACK = (0,0,0)
         self.BORDER = pygame.Rect(self.WIDTH/3 * 2,0,2, self.HEIGHT)
         self.ACTION = None
+        self.TABLE_RADIUS = 250
 
         self.player = None
         self.opponents = None
         self.tableCards = None
+
+        self.client_font = pygame.font.Font(None, 50)
+        self.opponents_font = pygame.font.Font(None, 32)
 
         self.callButton = button(self.WHITE,500,650,100,50,"Call!")
         self.foldButton = button(self.WHITE,400,650,100,50,"Fold!")
@@ -42,7 +48,7 @@ class game_window:
         self.allInButton = button(self.WHITE,200,650,100,50,"All In!")
 
 
-        pygame.init()
+
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("PokerGame!")
 
@@ -60,9 +66,35 @@ class game_window:
         img = pygame.transform.scale(img, (a,b))
         return img
 
+    def wrap_angle(self,n):
+        res = n % 180
+        if res > 90:
+            return 180 - res
+        return res
+
+    def calculate_position_for_oponnent(self, angle, R):
+        alpha = self.wrap_angle(angle)
+        t_x = self.WIDTH/3
+        t_y = self.HEIGHT/2
+        x =1
+        y = 1
+        if angle <= 90:
+            x = t_x - R*math.sin(math.radians(alpha))
+            y = t_y + R*math.cos(math.radians(alpha))
+        elif angle <= 180 and angle > 90:
+            x = t_x - R*math.sin(math.radians(alpha))
+            y = t_y - R*math.cos(math.radians(alpha))
+        elif angle > 180 and angle <= 270:
+            x = t_x + R*math.sin(math.radians(alpha))
+            y = t_y - R*math.cos(math.radians(alpha))
+        elif angle >270 and angle <= 360:
+            x = t_x + R*math.sin(math.radians(alpha))
+            y = t_y + R*math.cos(math.radians(alpha))
+        return x,y
+
     def draw_window(self):
         self.window.fill(self.BACKGROUND)
-        pygame.draw.circle(self.window, (0,255,0), (self.WIDTH/3, self.HEIGHT/2), 250)
+        pygame.draw.circle(self.window, (0,255,0), (self.WIDTH/3, self.HEIGHT/2), self.TABLE_RADIUS)
         if self.player is not None:
             card1 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(self.player.cards[0].get_card_in_int())))
             card1 = self.transform_img(card1,70,105)
@@ -71,11 +103,24 @@ class game_window:
                 os.path.join('../Assets/cards', cardDict.get(self.player.cards[1].get_card_in_int())))
             card2 = self.transform_img(card2, 70, 105)
             self.window.blit(card2, (self.WIDTH/3, self.HEIGHT - 155))
+            tokens_surface = self.client_font.render(str(self.player.tokens), True, (0, 0, 0))
+            self.window.blit(tokens_surface, (620, 650))
+            tokens_pool_surface = self.opponents_font.render(str(self.player.tokens_in_pool), True, (0,0,0))
+            self.window.blit(tokens_pool_surface, (self.WIDTH/3, self.HEIGHT - 175))
 
         if self.opponents is not None:
+            no_opponents = len(self.opponents)
+            angle = 360 / (no_opponents + 1)
+            dict(sorted(self.opponents.items(), key=lambda item: item[1].id))
+            i = 1
             for key, val in self.opponents.items():
-                pass
-                #print(val)
+                X,Y = self.calculate_position_for_oponnent(angle*i, self.TABLE_RADIUS+30)
+                pygame.draw.circle(self.window,(128, 119, 119),(X,Y), 50)
+                #TODO change
+                id_surface = self.opponents_font.render(str(val.id), True, (0,0,0))
+                self.window.blit(id_surface, (X,Y))
+                i+=1
+
                 #tutaj już iteruje po DICT'IE !! nie koniecznie posortowanym
 
         if self.tableCards is not None:
@@ -134,7 +179,44 @@ class game_window:
                         self.allInAction()
             self.draw_window()
 
+    def login(self):
+        width = 800
+        height = 32
+        base_font = pygame.font.Font(None, height)
+        nick = ''
+        msg = 'Enter your name and then press enter:'
+        nick_input = pygame.Rect(self.WIDTH/2 - width/2, self.HEIGHT/2 - height/2, width, height)
+        box_color = (255,255,255)
+        run = True
+        while run:
+            self.window.fill(self.BACKGROUND)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                    pygame.quit()
+                    quit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        nick = nick[0:-1]
+                    elif event.key == pygame.K_RETURN:
+                        if len(nick) != 0:
+                            return nick
+                    else:
+                        nick += event.unicode
+
+
+            pygame.draw.rect(self.window, box_color, nick_input)
+            nick_surface = base_font.render(nick, True, (0,0,0))
+            self.window.blit(nick_surface, (nick_input.x, nick_input.y + 5))
+
+            msg_surface = base_font.render(msg, True, (0,0,0))
+            self.window.blit(msg_surface, (nick_input.x, nick_input.y - height))
+
+            pygame.time.Clock().tick(self.FPS)
+            pygame.display.update()
+
 
 if __name__ == "__main__":
     game_window = game_window()
+    game_window.login()
     game_window.main()
