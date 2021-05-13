@@ -26,7 +26,7 @@ class game_window:
     def __init__(self):
         pygame.init()
         self.WIDTH = 1200
-        self.HEIGHT = 700
+        self.HEIGHT = 800
         self.FPS = 60
         self.BACKGROUND = (241,245,215)
         self.WHITE = (255,255,255)
@@ -34,6 +34,7 @@ class game_window:
         self.BORDER = pygame.Rect(self.WIDTH/3 * 2,0,2, self.HEIGHT)
         self.ACTION = None
         self.TABLE_RADIUS = 250
+        self.Y_CONF = 80
 
         self.player = None
         self.opponents = None
@@ -42,10 +43,10 @@ class game_window:
         self.client_font = pygame.font.Font(None, 50)
         self.opponents_font = pygame.font.Font(None, 32)
 
-        self.callButton = button(self.WHITE,500,650,100,50,"Call!")
-        self.foldButton = button(self.WHITE,400,650,100,50,"Fold!")
-        self.checkButton = button(self.WHITE,300,650,100,50,"Check!")
-        self.allInButton = button(self.WHITE,200,650,100,50,"All In!")
+        self.callButton = button(self.WHITE,500,665 + self.Y_CONF,100,50,"Call!")
+        self.foldButton = button(self.WHITE,400,665 + self.Y_CONF,100,50,"Fold!")
+        self.checkButton = button(self.WHITE,300,665 + self.Y_CONF,100,50,"Check!")
+        self.allInButton = button(self.WHITE,200,665 + self.Y_CONF,100,50,"All In!")
 
 
 
@@ -75,7 +76,7 @@ class game_window:
     def calculate_position_for_oponnent(self, angle, R):
         alpha = self.wrap_angle(angle)
         t_x = self.WIDTH/3
-        t_y = self.HEIGHT/2
+        t_y = self.HEIGHT/2 + self.Y_CONF
         x =1
         y = 1
         if angle <= 90:
@@ -94,19 +95,19 @@ class game_window:
 
     def draw_window(self):
         self.window.fill(self.BACKGROUND)
-        pygame.draw.circle(self.window, (0,255,0), (self.WIDTH/3, self.HEIGHT/2), self.TABLE_RADIUS)
+        pygame.draw.circle(self.window, (0,255,0), (self.WIDTH/3, self.HEIGHT/2 + self.Y_CONF), self.TABLE_RADIUS)
         if self.player is not None:
             card1 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(self.player.cards[0].get_card_in_int())))
             card1 = self.transform_img(card1,70,105)
-            self.window.blit(card1,(self.WIDTH/3 - 70, self.HEIGHT - 155))
+            self.window.blit(card1,(self.WIDTH/3 - 70, self.HEIGHT - 240 + self.Y_CONF))
             card2 = pygame.image.load(
                 os.path.join('../Assets/cards', cardDict.get(self.player.cards[1].get_card_in_int())))
             card2 = self.transform_img(card2, 70, 105)
-            self.window.blit(card2, (self.WIDTH/3, self.HEIGHT - 155))
+            self.window.blit(card2, (self.WIDTH/3, self.HEIGHT - 240 + self.Y_CONF))
             tokens_surface = self.client_font.render(str(self.player.tokens), True, (0, 0, 0))
             self.window.blit(tokens_surface, (620, 650))
             tokens_pool_surface = self.opponents_font.render(str(self.player.tokens_in_pool), True, (0,0,0))
-            self.window.blit(tokens_pool_surface, (self.WIDTH/3, self.HEIGHT - 175))
+            self.window.blit(tokens_pool_surface, (self.WIDTH/3, self.HEIGHT - 275 + self.Y_CONF))
 
         if self.opponents is not None:
             no_opponents = len(self.opponents)
@@ -116,12 +117,27 @@ class game_window:
             for key, val in self.opponents.items():
                 X,Y = self.calculate_position_for_oponnent(angle*i, self.TABLE_RADIUS+30)
                 pygame.draw.circle(self.window,(128, 119, 119),(X,Y), 50)
-                #TODO change
-                id_surface = self.opponents_font.render(str(val.id), True, (0,0,0))
+                #TODO karty wygranych się nie pokazują po końcu rundy, slider na raisa
+                #oponent_circle + tokens
+                id_surface = self.opponents_font.render(str(val.id), True, self.BLACK)
+                tokens_surface = self.opponents_font.render(str(val.tokens),True,self.BLACK)
+                tokens_pool_surface = self.opponents_font.render(str(val.tokens_in_pool), True,self.BLACK)
                 self.window.blit(id_surface, (X,Y))
+                self.window.blit((tokens_surface),(self.calculate_position_for_oponnent(angle*i, self.TABLE_RADIUS+70)))
+                self.window.blit((tokens_pool_surface),(self.calculate_position_for_oponnent(angle*i, self.TABLE_RADIUS-70)))
+                #end of oponent_circle + tokens
+                #start_oponnent cards
+                card1 = pygame.image.load(
+                    os.path.join('../Assets/cards', 'card_back.png'))
+                card1 = self.transform_img(card1, 70, 105)
+                self.window.blit(card1, (X-70, Y - 170))
+                card2 = pygame.image.load(
+                    os.path.join('../Assets/cards', 'card_back.png'))
+                card2 = self.transform_img(card2, 70, 105)
+                self.window.blit(card2, (X,Y-170))
+                #end_oponennt cards
                 i+=1
 
-                #tutaj już iteruje po DICT'IE !! nie koniecznie posortowanym
 
         if self.tableCards is not None:
             x_offset = 0
@@ -206,10 +222,10 @@ class game_window:
 
 
             pygame.draw.rect(self.window, box_color, nick_input)
-            nick_surface = base_font.render(nick, True, (0,0,0))
+            nick_surface = base_font.render(nick, True, self.BLACK)
             self.window.blit(nick_surface, (nick_input.x, nick_input.y + 5))
 
-            msg_surface = base_font.render(msg, True, (0,0,0))
+            msg_surface = base_font.render(msg, True, self.BLACK)
             self.window.blit(msg_surface, (nick_input.x, nick_input.y - height))
 
             pygame.time.Clock().tick(self.FPS)
