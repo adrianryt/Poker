@@ -6,6 +6,7 @@ from classes.game_info import GameInfo
 from classes.limited_player import LimitedPlayer
 import itertools
 import pickle
+import time
 
 HEADER = 64
 PORT = 5051
@@ -182,6 +183,7 @@ def engine():
         print("AFTER FLOP (3karty pokazane na stole)")
         game_table.deal_flop()
         sendCardsOnTable(game_table.players)
+        time.sleep(3)
         print(game_table.players_in_round)
         if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
             make_round()
@@ -189,17 +191,21 @@ def engine():
         print("AFTER TURN (kolejna karta na stole)")
         game_table.deal_turn_river()
         sendCardsOnTable(game_table.players)
+        time.sleep(3)
         if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
            make_round()
 
         print("AFTER RIVER (kolejna karta na stole)")
         game_table.deal_turn_river()
         sendCardsOnTable(game_table.players)
+        time.sleep(3)
         if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
             make_round()
 
         winners = game_table.reveal_winners()
         sendWhoWon(game_table.players, winners)
+        #TODO delete this
+        time.sleep(4)
         game_table.new_round()
 
 if __name__ == "__main__":

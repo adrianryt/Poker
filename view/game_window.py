@@ -1,6 +1,5 @@
 import pygame
 import os
-import math
 from view.button import button
 import sys
 from io import StringIO
@@ -30,6 +29,7 @@ class game_window:
         self.FPS = 60
         self.BACKGROUND = (241,245,215)
         self.WHITE = (255,255,255)
+        self.GREY = (128,128,128)
         self.BLACK = (0,0,0)
         self.BORDER = pygame.Rect(self.WIDTH/3 * 2,0,2, self.HEIGHT)
         self.ACTION = None
@@ -43,22 +43,35 @@ class game_window:
         self.client_font = pygame.font.Font(None, 50)
         self.opponents_font = pygame.font.Font(None, 32)
 
-        self.callButton = button(self.WHITE,500,665 + self.Y_CONF,100,50,"Call!")
-        self.foldButton = button(self.WHITE,400,665 + self.Y_CONF,100,50,"Fold!")
-        self.checkButton = button(self.WHITE,300,665 + self.Y_CONF,100,50,"Check!")
-        self.allInButton = button(self.WHITE,200,665 + self.Y_CONF,100,50,"All In!")
+        self.callButton = button(self.GREY,500,665 + self.Y_CONF,100,50,"Call!")
+        self.foldButton = button(self.GREY,400,665 + self.Y_CONF,100,50,"Fold!")
+        self.checkButton = button(self.GREY,300,665 + self.Y_CONF,100,50,"Check!")
+        self.allInButton = button(self.GREY,200,665 + self.Y_CONF,100,50,"All In!")
 
 
 
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("PokerGame!")
 
-    def reset_buttons(self):
+    #TODO chyba lepiej te buttony do tablicy wrzucic
+    def enable_buttons(self):
         self.callButton.disabled = False
-        self.callButton.disabled = False
+        self.foldButton.disabled = False
         self.checkButton.disabled = False
         self.allInButton.disabled = False
+        self.callButton.color = self.WHITE
+        self.foldButton.color = self.WHITE
+        self.checkButton.color = self.WHITE
+        self.allInButton.color = self.WHITE
         self.ACTION = None
+
+    #TODO nie wiem co tu sie dzieje w tym kodzie, kiedy te przyciski sa tak naprawde wylaczane
+    #naraazie tylko zmieniam ich kolor
+    def disable_buttons(self):
+        self.callButton.color = self.GREY
+        self.foldButton.color = self.GREY
+        self.checkButton.color = self.GREY
+        self.allInButton.color = self.GREY
 
     def update_opponent(self,l_player):
         self.opponents.update({l_player.id:l_player})
@@ -228,6 +241,28 @@ class game_window:
             msg_surface = base_font.render(msg, True, self.BLACK)
             self.window.blit(msg_surface, (nick_input.x, nick_input.y - height))
 
+            pygame.time.Clock().tick(self.FPS)
+            pygame.display.update()
+
+    def wait_for_players(self):
+
+        run = True
+        msg = "WAITING FOR PLAYERS"
+        height = 50
+        width = 500
+        msg_input = pygame.Rect(self.WIDTH / 2, self.HEIGHT / 2 , width, height)
+        while run:
+            self.window.fill(self.BACKGROUND)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                    pygame.quit()
+                    quit()
+
+            msg_surface = self.client_font.render(msg, True, self.BLACK)
+            self.window.blit(msg_surface, (msg_input.x, msg_input.y - height))
+            if (self.opponents != None):
+                return
             pygame.time.Clock().tick(self.FPS)
             pygame.display.update()
 
