@@ -10,73 +10,77 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 SERVER = "192.168.0.52"
 ADDR = (SERVER, PORT)
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
-
-game_window = game_window()
-
-def send(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    client.send(send_length)
-    client.send(message)
 
 
-def receve_pickle():
-    msg_length = client.recv(HEADER).decode(FORMAT)
-    if msg_length:
-        msg_length = int(msg_length)
-        msg = client.recv(msg_length)
-        return pickle.loads(msg)
-
-def recive():
-    wrapped_msg = receve_pickle()
-    if wrapped_msg[0] == DISCONNECT_MESSAGE:
-        client.send("Leaving message".encode(FORMAT))
-        # przydolby sie usuwac z dicta rozlaczonego gracza
-        client.close()
-    elif wrapped_msg[0] == "YOUR PLAYER":
-        game_window.player = wrapped_msg[1]
-        print(wrapped_msg[1])
-    elif wrapped_msg[0] == "CHOOSE MOVE":
-        print("Co robisz?")
-        game_window.enable_buttons()
-        while game_window.ACTION == None:
-            pass
-        send(game_window.ACTION)
-        game_window.ACTION = None
-        game_window.disable_buttons()
-
-    elif wrapped_msg[0] == "OPPONENT": #dostajemy info o jednym oponencie
-        game_window.update_opponent(wrapped_msg[1])
-        print(wrapped_msg[1])
-    elif wrapped_msg[0] == "OPPONENTS":  # dostajemy info o wszystkich oponentach
-        game_window.opponents = wrapped_msg[1]
-        print(wrapped_msg[1])
-    elif wrapped_msg[0] == "CARDS":
-        game_window.tableCards = wrapped_msg[1]
-        print(wrapped_msg[1])
-    elif wrapped_msg[0] == "WINNERS":
-        print("WINNERS:")
-        #TODO przydaloby sie gdzie indziej to dac, ale cos nie idzie bo pruje dupe
-        game_window.tableCards = None
-        print(wrapped_msg[1])
-    else:
-        return wrapped_msg[0]
 
 
-def listening():
-    while connected:
-        recive()
+class Client():
+    def __init__(self):
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client.connect(ADDR)
+        self.game_window = game_window(self.client)
+        self.connected = True
+
+    def send(self,msg):
+        message = msg.encode(FORMAT)
+        msg_length = len(message)
+        send_length = str(msg_length).encode(FORMAT)
+        send_length += b' ' * (HEADER - len(send_length))
+        self.client.send(send_length)
+        self.client.send(message)
+
+    def receve_pickle(self):
+        msg_length = self.client.recv(HEADER).decode(FORMAT)
+        if msg_length:
+            msg_length = int(msg_length)
+            msg = self.client.recv(msg_length)
+            return pickle.loads(msg)
+
+    def recive(self):
+        wrapped_msg = self.receve_pickle()
+        if wrapped_msg[0] == DISCONNECT_MESSAGE:
+            self.client.send("Leaving message".encode(FORMAT))
+            # przydolby sie usuwac z dicta rozlaczonego gracza
+            self.client.close()
+        elif wrapped_msg[0] == "YOUR PLAYER":
+            self.game_window.player = wrapped_msg[1]
+            print(wrapped_msg[1])
+        elif wrapped_msg[0] == "CHOOSE MOVE":
+            print("Co robisz?")
+            self.game_window.enable_buttons()
+            while self.game_window.ACTION is None:
+                pass
+            self.send(self.game_window.ACTION)
+            self.game_window.ACTION = None
+            self.game_window.disable_buttons()
+
+        elif wrapped_msg[0] == "OPPONENT": #dostajemy info o jednym oponencie
+            self.game_window.update_opponent(wrapped_msg[1])
+            print(wrapped_msg[1])
+        elif wrapped_msg[0] == "OPPONENTS":  # dostajemy info o wszystkich oponentach
+            self.game_window.opponents = wrapped_msg[1]
+            print(wrapped_msg[1])
+        elif wrapped_msg[0] == "CARDS":
+            self.game_window.tableCards = wrapped_msg[1]
+            print(wrapped_msg[1])
+        elif wrapped_msg[0] == "WINNERS":
+            print("WINNERS:")
+            #TODO przydaloby sie gdzie indziej to dac, ale cos nie idzie bo pruje dupe
+            self.game_window.tableCards = None
+            print(wrapped_msg[1])
+        else:
+            return wrapped_msg[0]
+
+    def listening(self):
+        while self.connected:
+            self.recive()
 
 
 if __name__ == "__main__":
-    connected = True
-    thread = threading.Thread(target=listening, args=())
+    client = Client()
+    thread = threading.Thread(target=client.listening, args=())
     thread.start()
-    nick = game_window.login()
-    send(nick)
-    game_window.wait_for_players()
-    game_window.main()
+    nick = client.game_window.login()
+    client.send(nick)
+    client.game_window.wait_for_players()
+    client.game_window.main()

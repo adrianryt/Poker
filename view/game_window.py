@@ -23,7 +23,8 @@ cardDict = {None: 'red_joker.png', 8:'2_of_spades.png',9: '2_of_clubs.png',10: '
             }
 
 class game_window:
-    def __init__(self):
+    def __init__(self, client):
+        self.client = client
         pygame.init()
         self.WIDTH = 1200
         self.HEIGHT = 800
@@ -40,6 +41,7 @@ class game_window:
         self.player = None
         self.opponents = None
         self.tableCards = None
+
 
         self.client_font = pygame.font.Font(None, 50)
         self.opponents_font = pygame.font.Font(None, 32)
@@ -206,6 +208,7 @@ class game_window:
                 pos = pygame.mouse.get_pos()
                 if event.type == pygame.QUIT:
                     run = False
+                    self.client
                     pygame.quit()
                     quit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
