@@ -7,7 +7,7 @@ HEADER = 64
 PORT = 5051
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.65.183"
+SERVER = "192.168.0.52"
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,11 +44,12 @@ def recive():
         print(wrapped_msg[1])
     elif wrapped_msg[0] == "CHOOSE MOVE":
         print("Co robisz?")
-        game_window.reset_buttons()
+        game_window.enable_buttons()
         while game_window.ACTION == None:
             pass
         send(game_window.ACTION)
         game_window.ACTION = None
+        game_window.disable_buttons()
 
     elif wrapped_msg[0] == "OPPONENT": #dostajemy info o jednym oponencie
         game_window.update_opponent(wrapped_msg[1])
@@ -78,4 +79,5 @@ if __name__ == "__main__":
     thread.start()
     nick = game_window.login()
     send(nick)
+    game_window.wait_for_players()
     game_window.main()
