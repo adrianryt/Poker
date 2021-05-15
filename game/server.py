@@ -118,7 +118,7 @@ def sendRivalsData(players):
     for player in players:
         players_dict.pop(player.id)
         for key, val in players_dict.items():
-            pass;
+            pass
         wrapped_msg = wrap_message("OPPONENTS",players_dict)
         send_pickle(player, wrapped_msg)
         players_dict[player.id] = player
@@ -183,19 +183,19 @@ def engine():
         game_table.deal_flop()
         sendCardsOnTable(game_table.players)
         print(game_table.players_in_round)
-        if len(game_table.players_in_round) > 1:
+        if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
             make_round()
 
         print("AFTER TURN (kolejna karta na stole)")
         game_table.deal_turn_river()
         sendCardsOnTable(game_table.players)
-        if len(game_table.players_in_round) > 1:
+        if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
            make_round()
 
         print("AFTER RIVER (kolejna karta na stole)")
         game_table.deal_turn_river()
         sendCardsOnTable(game_table.players)
-        if len(game_table.players_in_round) > 1:
+        if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
             make_round()
 
         winners = game_table.reveal_winners()
