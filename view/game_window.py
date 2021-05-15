@@ -131,6 +131,7 @@ class game_window:
         if self.opponents is not None:
             no_opponents = len(self.opponents)
             angle = 360 / (no_opponents + 1)
+            #TODO przydaloby sie chyba innej struktury uzyc, bo ciagle sortowanie nie ma sensu, chyba ze wystarczy raz na samym poczatku dunno
             dict(sorted(self.opponents.items(), key=lambda item: item[1].id))
             i = 1
             for key, val in self.opponents.items():
@@ -208,7 +209,7 @@ class game_window:
                 pos = pygame.mouse.get_pos()
                 if event.type == pygame.QUIT:
                     run = False
-                    self.client
+                    #TODO tu obsluzyc jak sie chce rozlaczyc bedzie uciazliwe to chyba zeby game loopa nie popsuc
                     pygame.quit()
                     quit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
