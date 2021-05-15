@@ -101,29 +101,33 @@ def sendDataToRivals(players, client):
         #send_pickle(r,tmp)
         send_pickle(r, wrapped_msg)
 
+#TODO chyba nie jest to potrzebne
 def sendWhoWon(players, winners):
     tmp =[]
     for winner in winners:
         tmp.append(LimitedPlayer(winner))
     for p in players:
-        #send(conn_dict[p.id], "WINNERS")
-        #send_pickle(p,tmp)
         wrapped_msg = wrap_message("WINNERS", tmp)
         send_pickle(p, wrapped_msg)
 
 def sendRivalsData(players):
     players_dict = {}
     for player in players:
-        players_dict[player.id] = player
+        players_dict[player.id] = LimitedPlayer(player)
 
     for player in players:
         players_dict.pop(player.id)
-        for key, val in players_dict.items():
-            pass
         wrapped_msg = wrap_message("OPPONENTS",players_dict)
         send_pickle(player, wrapped_msg)
-        players_dict[player.id] = player
+        players_dict[player.id] = LimitedPlayer(player)
 
+#TODO zmienic nazwe narazie nie mam pomyslu, to wysylamy po ostatniej rundzie
+def sendPlayersLastRound(allPlayers, playersActive):
+    for all_p in allPlayers:
+        for p_a in playersActive:
+            if p_a != all_p:
+                wrapped_msg = wrap_message("OPPONENT", p_a)
+                send_pickle(all_p, wrapped_msg)
 
 def round_action(p):
     #send(conn_dict[p.id], "CHOOSE MOVE")
@@ -202,6 +206,8 @@ def engine():
         if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
             make_round()
 
+        sendPlayersLastRound(game_table.players, game_table.players_in_round)
+        time.sleep(5)
         winners = game_table.reveal_winners()
         sendWhoWon(game_table.players, winners)
         #TODO delete this

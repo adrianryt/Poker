@@ -4,6 +4,7 @@ from view.button import button
 import sys
 from io import StringIO
 import math
+from pygame_widgets import Slider
 
 
 cardDict = {None: 'red_joker.png', 8:'2_of_spades.png',9: '2_of_clubs.png',10: '2_of_diamonds.png',11:'2_of_hearts.png',
@@ -50,7 +51,9 @@ class game_window:
 
 
 
+
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+
         pygame.display.set_caption("PokerGame!")
 
     #TODO chyba lepiej te buttony do tablicy wrzucic
@@ -68,6 +71,7 @@ class game_window:
     #TODO nie wiem co tu sie dzieje w tym kodzie, kiedy te przyciski sa tak naprawde wylaczane
     #naraazie tylko zmieniam ich kolor
     def disable_buttons(self):
+        self.allInButton.disabled = True
         self.callButton.color = self.GREY
         self.foldButton.color = self.GREY
         self.checkButton.color = self.GREY
@@ -132,7 +136,7 @@ class game_window:
                 pygame.draw.circle(self.window,(128, 119, 119),(X,Y), 50)
                 #TODO karty wygranych się nie pokazują po końcu rundy, slider na raisa
                 #oponent_circle + tokens
-                id_surface = self.opponents_font.render(str(val.id), True, self.BLACK)
+                id_surface = self.opponents_font.render(str(val.name), True, self.BLACK)
                 tokens_surface = self.opponents_font.render(str(val.tokens),True,self.BLACK)
                 tokens_pool_surface = self.opponents_font.render(str(val.tokens_in_pool), True,self.BLACK)
                 self.window.blit(id_surface, (X,Y))
@@ -140,12 +144,17 @@ class game_window:
                 self.window.blit((tokens_pool_surface),(self.calculate_position_for_oponnent(angle*i, self.TABLE_RADIUS-70)))
                 #end of oponent_circle + tokens
                 #start_oponnent cards
-                card1 = pygame.image.load(
-                    os.path.join('../Assets/cards', 'card_back.png'))
+                card1 = None
+                card2 = None
+                if hasattr(val, "cards"):
+                    card1 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(val.cards[0].get_card_in_int())))
+                    card2 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(val.cards[1].get_card_in_int())))
+                else:
+                    card1 = pygame.image.load(os.path.join('../Assets/cards', 'card_back.png'))
+                    card2 = pygame.image.load(os.path.join('../Assets/cards', 'card_back.png'))
+
                 card1 = self.transform_img(card1, 70, 105)
                 self.window.blit(card1, (X-70, Y - 170))
-                card2 = pygame.image.load(
-                    os.path.join('../Assets/cards', 'card_back.png'))
                 card2 = self.transform_img(card2, 70, 105)
                 self.window.blit(card2, (X,Y-170))
                 #end_oponennt cards
@@ -157,7 +166,7 @@ class game_window:
             for card in self.tableCards:
                 card = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(card.get_card_in_int())))
                 card = self.transform_img(card, 70, 105)
-                self.window.blit(card, (self.WIDTH / 3 - 175 + x_offset, self.HEIGHT/2 - 105))
+                self.window.blit(card, (self.WIDTH / 3 - 175 + x_offset, self.HEIGHT/2))
                 x_offset += 70
 
         pygame.draw.rect(self.window, self.BLACK, self.BORDER)
@@ -169,6 +178,7 @@ class game_window:
         self.checkButton.draw(self.window, self.BLACK)
         self.allInButton.draw(self.window, self.BLACK)
 
+        pygame.time.Clock().tick(self.FPS)
         pygame.display.update()
 
     def callAction(self):
@@ -191,7 +201,8 @@ class game_window:
         run = True
         while run:
             pygame.time.Clock().tick(self.FPS)
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 pos = pygame.mouse.get_pos()
                 if event.type == pygame.QUIT:
                     run = False
@@ -206,6 +217,8 @@ class game_window:
                         self.checkAction()
                     if self.allInButton.isOver(pos):
                         self.allInAction()
+
+
             self.draw_window()
 
     def login(self):

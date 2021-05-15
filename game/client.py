@@ -15,8 +15,6 @@ client.connect(ADDR)
 
 game_window = game_window()
 
-
-
 def send(msg):
     message = msg.encode(FORMAT)
     msg_length = len(message)
@@ -62,6 +60,7 @@ def recive():
         print(wrapped_msg[1])
     elif wrapped_msg[0] == "WINNERS":
         print("WINNERS:")
+        #TODO przydaloby sie gdzie indziej to dac, ale cos nie idzie bo pruje dupe
         game_window.tableCards = None
         print(wrapped_msg[1])
     else:
