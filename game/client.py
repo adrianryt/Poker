@@ -19,10 +19,11 @@ class Client():
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect(ADDR)
-        self.game_window = game_window(self.client)
+        self.game_window = game_window(self)
         self.connected = True
 
     def send(self,msg):
+        print("siema",msg, type(msg))
         message = msg.encode(FORMAT)
         msg_length = len(message)
         send_length = str(msg_length).encode(FORMAT)
@@ -49,11 +50,12 @@ class Client():
         elif wrapped_msg[0] == "CHOOSE MOVE":
             print("Co robisz?")
             self.game_window.enable_buttons()
-            while self.game_window.ACTION is None:
-                pass
-            self.send(self.game_window.ACTION)
-            self.game_window.ACTION = None
-            self.game_window.disable_buttons()
+
+            # while self.game_window.ACTION is None:
+            #     pass
+            # self.send(self.game_window.ACTION)
+            # self.game_window.ACTION = None
+            # self.game_window.disable_buttons()
         #lock dla opponentów - chyba działa ale nie mam jak sprawdzić
         elif wrapped_msg[0] == "OPPONENT": #dostajemy info o jednym oponencie
             lock.acquire()

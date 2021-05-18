@@ -133,6 +133,7 @@ def round_action(p):
     #send(conn_dict[p.id], "CHOOSE MOVE")
     wrapped_msg = wrap_message("CHOOSE MOVE", p)
     send_pickle(p, wrapped_msg)
+    #on tutaj czeka na odpowiedz - czyli na klikniecie buttona
     what_to_do = recive(conn_dict[p.id])
     if what_to_do == "fold":
         p.fold(game_table)

@@ -228,19 +228,27 @@ class game_window:
 
     def callAction(self):
         print("CALL - XD")
-        self.ACTION = "call"
+        self.client.send("call")
+        self.disable_buttons()
+        #self.ACTION = "call"
 
     def foldAction(self):
         print("FOLD - XD")
-        self.ACTION = "fold"
+        self.client.send("fold")
+        self.disable_buttons()
+        #self.ACTION = "fold"
 
     def checkAction(self):
         print("CHECK - XD")
-        self.ACTION = "check"
+        self.client.send("check")
+        self.disable_buttons()
+        #self.ACTION = "check"
 
     def allInAction(self):
         print("ALLIN - XD")
-        self.ACTION = "allIn"
+        self.client.send("allIn")
+        self.disable_buttons()
+        #self.ACTION = "allIn"
 
     def main(self):
         run = True
