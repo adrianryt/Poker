@@ -3,6 +3,10 @@ import os
 from pygame_widgets import Button
 import math
 from pygame_widgets import Slider
+import threading
+import time
+
+lock = threading.Lock()
 
 
 cardDict = {None: 'red_joker.png', 8:'2_of_spades.png',9: '2_of_clubs.png',10: '2_of_diamonds.png',11:'2_of_hearts.png',
@@ -133,6 +137,9 @@ class game_window:
             angle = 360 / (no_opponents + 1)
             #TODO przydaloby sie chyba innej struktury uzyc, bo ciagle sortowanie nie ma sensu, chyba ze wystarczy raz na samym poczatku dunno
             #tu było sortowanie ale już nie ma jakby się coś jebało z kolejnością to trzeba tu dać to sortowanie
+
+
+            lock.acquire()
             i = 1
             for key, val in self.opponents.items():
                 X,Y = self.calculate_position_for_oponnent(angle*i, self.TABLE_RADIUS+30)
@@ -162,6 +169,7 @@ class game_window:
                 self.window.blit(card2, (X,Y-170))
                 #end_oponennt cards
                 i+=1
+            lock.release()
 
         #table_cards_drawing
         if self.tableCards is not None:

@@ -2,6 +2,7 @@ import socket
 import threading
 import pickle
 from view.game_window import game_window
+from view.game_window import lock
 
 HEADER = 64
 PORT = 5051
@@ -53,12 +54,16 @@ class Client():
             self.send(self.game_window.ACTION)
             self.game_window.ACTION = None
             self.game_window.disable_buttons()
-
+        #lock dla opponentów - chyba działa ale nie mam jak sprawdzić
         elif wrapped_msg[0] == "OPPONENT": #dostajemy info o jednym oponencie
+            lock.acquire()
             self.game_window.update_opponent(wrapped_msg[1])
+            lock.release()
             print(wrapped_msg[1])
         elif wrapped_msg[0] == "OPPONENTS":  # dostajemy info o wszystkich oponentach
+            lock.acquire()
             self.game_window.opponents = wrapped_msg[1]
+            lock.release()
             dict(sorted(self.game_window.opponents.items(), key=lambda item: item[1].id))
             print(wrapped_msg[1])
         elif wrapped_msg[0] == "CARDS":
