@@ -1,8 +1,6 @@
 import pygame
 import os
-from view.button import button
-import sys
-from io import StringIO
+from pygame_widgets import Button
 import math
 from pygame_widgets import Slider
 
@@ -42,42 +40,43 @@ class game_window:
         self.opponents = None
         self.tableCards = None
 
-
         self.client_font = pygame.font.Font(None, 50)
         self.opponents_font = pygame.font.Font(None, 32)
 
-        self.callButton = button(self.GREY,500,665 + self.Y_CONF,100,50,"Call!")
-        self.foldButton = button(self.GREY,400,665 + self.Y_CONF,100,50,"Fold!")
-        self.checkButton = button(self.GREY,300,665 + self.Y_CONF,100,50,"Check!")
-        self.allInButton = button(self.GREY,200,665 + self.Y_CONF,100,50,"All In!")
-
-
-
-
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
 
+        self.callButton = Button(
+            self.window, 500, 665 + self.Y_CONF, 100, 50, text='Call!',
+            fontSize=50, margin=20,
+            inactiveColour=(121, 226, 237),
+            hoverColour=(19, 52, 171),
+            pressedColour=(237, 62, 62), radius=20,
+            onClick=self.callAction)
+        self.foldButton = Button(
+            self.window, 400, 665 + self.Y_CONF, 100, 50, text='Fold!',
+            fontSize=50, margin=20,
+            inactiveColour=(121, 226, 237),
+            hoverColour=(19, 52, 171),
+            pressedColour=(237, 62, 62), radius=20,
+            onClick=self.foldAction)
+        self.checkButton = Button(
+            self.window, 300, 665 + self.Y_CONF, 100, 50, text='Check',
+            fontSize=50, margin=20,
+            inactiveColour=(121, 226, 237),
+            hoverColour=(19, 52, 171),
+            pressedColour=(237, 62, 62), radius=20,
+            onClick=self.checkAction)
+        self.allInButton = Button(
+            self.window, 200, 665 + self.Y_CONF, 100, 50, text='All In!',
+            fontSize=50, margin=20,
+            inactiveColour=(121, 226, 237),
+            hoverColour=(19, 52, 171),
+            pressedColour=(237, 62, 62), radius=20,
+            onClickParams=(),
+            onClick=self.allInAction)
+
+        self.slider = Slider(self.window, 600, 665 + self.Y_CONF, 150, 50, min=0, max=99, step=1)
         pygame.display.set_caption("PokerGame!")
-
-    #TODO chyba lepiej te buttony do tablicy wrzucic
-    def enable_buttons(self):
-        self.callButton.disabled = False
-        self.foldButton.disabled = False
-        self.checkButton.disabled = False
-        self.allInButton.disabled = False
-        self.callButton.color = self.WHITE
-        self.foldButton.color = self.WHITE
-        self.checkButton.color = self.WHITE
-        self.allInButton.color = self.WHITE
-        self.ACTION = None
-
-    #TODO nie wiem co tu sie dzieje w tym kodzie, kiedy te przyciski sa tak naprawde wylaczane
-    #naraazie tylko zmieniam ich kolor
-    def disable_buttons(self):
-        self.allInButton.disabled = True
-        self.callButton.color = self.GREY
-        self.foldButton.color = self.GREY
-        self.checkButton.color = self.GREY
-        self.allInButton.color = self.GREY
 
     def update_opponent(self,l_player):
         self.opponents.update({l_player.id:l_player})
@@ -115,6 +114,7 @@ class game_window:
     def draw_window(self):
         self.window.fill(self.BACKGROUND)
         pygame.draw.circle(self.window, (0,255,0), (self.WIDTH/3, self.HEIGHT/2 + self.Y_CONF), self.TABLE_RADIUS)
+        #player_drawing
         if self.player is not None:
             card1 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(self.player.cards[0].get_card_in_int())))
             card1 = self.transform_img(card1,70,105)
@@ -132,7 +132,7 @@ class game_window:
             no_opponents = len(self.opponents)
             angle = 360 / (no_opponents + 1)
             #TODO przydaloby sie chyba innej struktury uzyc, bo ciagle sortowanie nie ma sensu, chyba ze wystarczy raz na samym poczatku dunno
-            dict(sorted(self.opponents.items(), key=lambda item: item[1].id))
+            #tu było sortowanie ale już nie ma jakby się coś jebało z kolejnością to trzeba tu dać to sortowanie
             i = 1
             for key, val in self.opponents.items():
                 X,Y = self.calculate_position_for_oponnent(angle*i, self.TABLE_RADIUS+30)
@@ -163,7 +163,7 @@ class game_window:
                 #end_oponennt cards
                 i+=1
 
-
+        #table_cards_drawing
         if self.tableCards is not None:
             x_offset = 0
             for card in self.tableCards:
@@ -173,31 +173,65 @@ class game_window:
                 x_offset += 70
 
         pygame.draw.rect(self.window, self.BLACK, self.BORDER)
-
-
-        self.callButton.draw(self.window,self.BLACK)
-        self.foldButton.draw(self.window, self.BLACK)
-        self.callButton.draw(self.window, self.BLACK)
-        self.checkButton.draw(self.window, self.BLACK)
-        self.allInButton.draw(self.window, self.BLACK)
-
         pygame.time.Clock().tick(self.FPS)
         pygame.display.update()
 
+    def enable_buttons(self):
+        self.callButton.inactiveColour = (121, 226, 237)
+        self.callButton.hoverColour = (19, 52, 171)
+        self.callButton.pressedColour = (237, 62, 62)
+        self.callButton.onClick = self.callAction
+
+        self.foldButton.inactiveColour = (121, 226, 237)
+        self.foldButton.hoverColour = (19, 52, 171)
+        self.foldButton.pressedColour = (237, 62, 62)
+        self.foldButton.onClick = self.foldAction
+
+        self.checkButton.inactiveColour = (121, 226, 237)
+        self.checkButton.hoverColour = (19, 52, 171)
+        self.checkButton.pressedColour = (237, 62, 62)
+        self.checkButton.onClick = self.checkAction
+
+        self.allInButton.inactiveColour = (121, 226, 237)
+        self.allInButton.hoverColour = (19, 52, 171)
+        self.allInButton.pressedColour = (237, 62, 62)
+        self.allInButton.onClick = self.allInAction
+
+    def disable_buttons(self):
+        self.callButton.inactiveColour = (122, 122, 120)
+        self.callButton.hoverColour = (122, 122, 120)
+        self.callButton.pressedColour = (122, 122, 120)
+        self.callButton.onClick = lambda: print("Call-disabled")
+
+        self.foldButton.inactiveColour = (122, 122, 120)
+        self.foldButton.hoverColour = (122, 122, 120)
+        self.foldButton.pressedColour = (122, 122, 120)
+        self.foldButton.onClick = lambda: print("Fold-disabled")
+
+        self.checkButton.inactiveColour = (122, 122, 120)
+        self.checkButton.hoverColour = (122, 122, 120)
+        self.checkButton.pressedColour = (122, 122, 120)
+        self.checkButton.onClick = lambda: print("Check-disabled")
+
+        self.allInButton.inactiveColour = (122, 122, 120)
+        self.allInButton.hoverColour = (122, 122, 120)
+        self.allInButton.pressedColour = (122, 122, 120)
+        self.allInButton.onClick = lambda: print("AllIn-disabled")
+
     def callAction(self):
-        self.callButton.disabled = True
+        print("CALL - XD")
         self.ACTION = "call"
 
     def foldAction(self):
-        self.foldButton.disabled = True
+        print("FOLD - XD")
         self.ACTION = "fold"
 
     def checkAction(self):
-        self.checkButton.disabled = True
+        print("CHECK - XD")
         self.ACTION = "check"
 
     def allInAction(self):
-        self.allInButton.disabled = True
+        print("ALLIN - XD")
         self.ACTION = "allIn"
 
     def main(self):
@@ -206,24 +240,24 @@ class game_window:
             pygame.time.Clock().tick(self.FPS)
             events = pygame.event.get()
             for event in events:
-                pos = pygame.mouse.get_pos()
                 if event.type == pygame.QUIT:
                     run = False
                     #TODO tu obsluzyc jak sie chce rozlaczyc bedzie uciazliwe to chyba zeby game loopa nie popsuc
                     pygame.quit()
                     quit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.callButton.isOver(pos):
-                        self.callAction()
-                    if self.foldButton.isOver(pos):
-                        self.foldAction()
-                    if self.checkButton.isOver(pos):
-                        self.checkAction()
-                    if self.allInButton.isOver(pos):
-                        self.allInAction()
-
 
             self.draw_window()
+            self.callButton.listen(events)
+            self.callButton.draw()
+            self.foldButton.listen(events)
+            self.foldButton.draw()
+            self.checkButton.listen(events)
+            self.checkButton.draw()
+            self.allInButton.listen(events)
+            self.allInButton.draw()
+            self.slider.listen(events)
+            self.slider.draw()
+            pygame.display.update()
 
     def login(self):
         width = 800
@@ -250,7 +284,6 @@ class game_window:
                     else:
                         nick += event.unicode
 
-
             pygame.draw.rect(self.window, box_color, nick_input)
             nick_surface = base_font.render(nick, True, self.BLACK)
             self.window.blit(nick_surface, (nick_input.x, nick_input.y + 5))
@@ -262,7 +295,6 @@ class game_window:
             pygame.display.update()
 
     def wait_for_players(self):
-
         run = True
         msg = "WAITING FOR PLAYERS"
         height = 50
@@ -282,7 +314,6 @@ class game_window:
                 return
             pygame.time.Clock().tick(self.FPS)
             pygame.display.update()
-
 
 if __name__ == "__main__":
     game_window = game_window()

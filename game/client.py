@@ -7,7 +7,7 @@ HEADER = 64
 PORT = 5051
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.0.52"
+SERVER = "192.168.65.183"
 ADDR = (SERVER, PORT)
 
 
@@ -59,6 +59,7 @@ class Client():
             print(wrapped_msg[1])
         elif wrapped_msg[0] == "OPPONENTS":  # dostajemy info o wszystkich oponentach
             self.game_window.opponents = wrapped_msg[1]
+            dict(sorted(self.game_window.opponents.items(), key=lambda item: item[1].id))
             print(wrapped_msg[1])
         elif wrapped_msg[0] == "CARDS":
             self.game_window.tableCards = wrapped_msg[1]
@@ -81,6 +82,8 @@ if __name__ == "__main__":
     thread = threading.Thread(target=client.listening, args=())
     thread.start()
     nick = client.game_window.login()
+    client.game_window.disable_buttons()
     client.send(nick)
     client.game_window.wait_for_players()
     client.game_window.main()
+
