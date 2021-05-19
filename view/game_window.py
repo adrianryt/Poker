@@ -42,7 +42,7 @@ class game_window:
         self.Y_CONF = 80
 
         self.player = None
-        self.opponents = None
+        self.opponents = {}
         self.tableCards = None
 
         self.client_font = pygame.font.Font(None, 50)
@@ -55,7 +55,7 @@ class game_window:
         self.allInButton = ActionButton(self.window, 200, 665 + self.Y_CONF, 'AllIn', self)
         self.raiseButton = ActionButton(self.window, 500, 665 + self.Y_CONF, "Raise", self)
 
-        self.slider = Slider(self.window, 600, 565 + self.Y_CONF, 150, 30, min=0, max=99, step=1)
+        self.slider = Slider(self.window, 600, 565 + self.Y_CONF, 150, 30, min=0, max=99, step=10)
         self.raiseNumberBox = TextBox(self.window, 600,  665 + self.Y_CONF, 100, 50, fontSize=30)
         pygame.display.set_caption("PokerGame!")
 
@@ -111,7 +111,7 @@ class game_window:
             tokens_pool_surface = self.opponents_font.render(str(self.player.tokens_in_pool), True, (0,0,0))
             self.window.blit(tokens_pool_surface, (self.WIDTH/3, self.HEIGHT - 275 + self.Y_CONF))
 
-        if self.opponents is not None:
+        if len(self.opponents) != 0:
             no_opponents = len(self.opponents)
             angle = 360 / (no_opponents + 1)
             #TODO przydaloby sie chyba innej struktury uzyc, bo ciagle sortowanie nie ma sensu, chyba ze wystarczy raz na samym poczatku dunno
@@ -169,8 +169,12 @@ class game_window:
         self.allInButton.enable_btn()
         self.raiseButton.enable_btn()
 
+        max_bet = max([p.tokens_in_pool for p in self.opponents.values()])
+        if max_bet == self.player.tokens_in_pool:
+            self.checkButton.enable_btn()
+
         self.callButton.enable_btn()
-        self.checkButton.enable_btn()
+
 
 
     def disable_buttons(self):
@@ -264,7 +268,7 @@ class game_window:
 
             msg_surface = self.client_font.render(msg, True, self.BLACK)
             self.window.blit(msg_surface, (msg_input.x, msg_input.y - height))
-            if (self.opponents != None):
+            if len(self.opponents) != 0:
                 return
             pygame.time.Clock().tick(self.FPS)
             pygame.display.update()
