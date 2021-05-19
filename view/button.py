@@ -31,6 +31,7 @@ class ActionButton(Button) :
 
     def normal_action(self):
         self.game_window.client.send(self.action_text)
+        self.game_window.disable_buttons()
 
     def raise_action(self):
         pass
