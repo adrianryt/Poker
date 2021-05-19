@@ -80,6 +80,10 @@ class Client():
             lock.acquire()
             self.game_window.game_info = wrapped_msg[1]
             lock.release()
+        elif wrapped_msg[0] == "POOL":
+            lock.acquire()
+            self.game_window.pool = wrapped_msg[1]
+            lock.release()
         else:
             return wrapped_msg[0]
 

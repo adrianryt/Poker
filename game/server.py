@@ -129,10 +129,12 @@ def sendPlayersLastRound(allPlayers, playersActive):
                 wrapped_msg = wrap_message("OPPONENT", p_a)
                 send_pickle(all_p, wrapped_msg)
 
-def send_game_info(all_players,info):
+def send_game_info(all_players,info, tokens_pool):
     game_info = wrap_message("GAME INFO", info)
+    pool = wrap_message("POOL", tokens_pool)
     for p in all_players:
         send_pickle(p, game_info)
+        send_pickle(p, pool)
 
 def round_action(p):
     #send(conn_dict[p.id], "CHOOSE MOVE")
@@ -161,7 +163,7 @@ def make_round():
     for idx, p in enumerate(itertools.cycle(game_table.players), 1):
         if p in game_table.players_in_round and len(game_table.players_in_round) > 1:
             round_action(p)
-            send_game_info(game_table.players, game_table.game_info)
+            send_game_info(game_table.players, game_table.game_info, game_table.pool)
         if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
                game_table.players_in_round) and idx >= players_number:
             break
@@ -174,7 +176,7 @@ def make_round():
 
 
 def engine():
-    send_game_info(game_table.players, game_table.game_info)
+    send_game_info(game_table.players, game_table.game_info, game_table.pool)
     while True:
         print("NEW ROUND")
         game_table.update_players_in_round()
@@ -185,13 +187,14 @@ def engine():
         game_table.deal_cards_players()
         sendClientData(game_table.players)
         sendRivalsData(game_table.players)
+        send_game_info(game_table.players, game_table.game_info, game_table.pool)
         # te petle to te rozdania
         if len(game_table.players_in_round) > 1:
             players_number = len(game_table.players)
             for idx, p in enumerate(itertools.cycle(game_table.players), 1):
                 if p in game_table.players_in_round and idx != 1 and idx != 2 and len(game_table.players_in_round) > 1:
                    round_action(p)
-                   send_game_info(game_table.players, game_table.game_info)
+                   send_game_info(game_table.players, game_table.game_info, game_table.pool)
                 if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
                        game_table.players_in_round) and idx >= players_number + 2:
                     break
@@ -222,6 +225,7 @@ def engine():
         sendPlayersLastRound(game_table.players, game_table.players_in_round)
         time.sleep(5)
         winners = game_table.reveal_winners()
+        print(winners, "DDDDDDD")
         sendWhoWon(game_table.players, winners)
         #TODO delete this
         time.sleep(4)

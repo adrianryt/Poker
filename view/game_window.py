@@ -45,6 +45,7 @@ class game_window:
         self.opponents = {}
         self.tableCards = None
         self.game_info = None
+        self.pool = 0
 
         self.client_font = pygame.font.Font(None, 50)
         self.opponents_font = pygame.font.Font(None, 32)
@@ -56,7 +57,7 @@ class game_window:
         self.allInButton = ActionButton(self.window, 200, 665 + self.Y_CONF, 'AllIn', self)
         self.raiseButton = ActionButton(self.window, 500, 665 + self.Y_CONF, "Raise", self)
 
-        self.slider = Slider(self.window, 600, 565 + self.Y_CONF, 150, 30, min=0, max=99, step=10)
+        self.slider = Slider(self.window, 600, 600 + self.Y_CONF, 150, 30, min=0, max=99, step=10)
         self.raiseNumberBox = TextBox(self.window, 600,  665 + self.Y_CONF, 100, 50, fontSize=30)
         pygame.display.set_caption("PokerGame!")
 
@@ -98,8 +99,8 @@ class game_window:
         pygame.draw.circle(self.window, (0,255,0), (self.WIDTH/3, self.HEIGHT/2 + self.Y_CONF), self.TABLE_RADIUS)
         #player_drawing
         if self.player is not None:
-            self.slider.__setattr__("min", 10)
-            self.slider.__setattr__("max", self.player.tokens)
+            self.slider.__setattr__("min", self.game_info.big_blind)
+            self.slider.__setattr__("max", self.player.tokens - self.game_info.biggest_bet)
             card1 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(self.player.cards[0].get_card_in_int())))
             card1 = self.transform_img(card1,70,105)
             self.window.blit(card1,(self.WIDTH/3 - 70, self.HEIGHT - 240 + self.Y_CONF))
@@ -160,6 +161,13 @@ class game_window:
                 self.window.blit(card, (self.WIDTH / 3 - 175 + x_offset, self.HEIGHT/2))
                 x_offset += 70
 
+        #mozliwe ze te locki sa tu nie potrzebne
+        lock.acquire()
+        pool_surface = self.client_font.render(str(self.pool), True, (0, 0, 0))
+        lock.release()
+
+        self.window.blit(pool_surface, (0, 0))
+
         pygame.draw.rect(self.window, self.BLACK, self.BORDER)
         # pygame.time.Clock().tick(self.FPS)
         # pygame.display.update()
@@ -168,13 +176,17 @@ class game_window:
         #te przyciski zawze mozna wcisnac
         self.foldButton.enable_btn()
         self.allInButton.enable_btn()
-        self.raiseButton.enable_btn()
 
+
+        lock.acquire()
         max_bet = self.game_info.biggest_bet
+        lock.release()
         if max_bet == self.player.tokens_in_pool:
             self.checkButton.enable_btn()
-        if max_bet > self.player.tokens_in_pool:
+        if max_bet > self.player.tokens_in_pool and self.game_info.biggest_bet - self.player.tokens_in_pool < self.player.tokens:
             self.callButton.enable_btn()
+        if max_bet < self.player.tokens:
+            self.raiseButton.enable_btn()
 
 
 
@@ -214,7 +226,8 @@ class game_window:
 
             self.raiseNumberBox.setText(self.slider.getValue())
             self.raiseNumberBox.draw()
-            self.raiseButton.setOnClick(self.raiseButton.action, [self.slider.getValue()])
+            if self.raiseButton.enable:
+                self.raiseButton.setOnClick(self.raiseButton.action, [self.slider.getValue()])
             pygame.time.Clock().tick(self.FPS)
             pygame.display.update()
 

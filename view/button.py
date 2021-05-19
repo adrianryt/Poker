@@ -22,6 +22,7 @@ class ActionButton(Button) :
                          hoverColour=B_HOVER_COLOR,
                          pressedColour=B_PRESSED_COLOR, radius=B_RADIUS,
                          onClick=self.action)
+        self.enable = True
 
     def action_based_on_text(self, text):
         if text == "Raise":
@@ -43,6 +44,7 @@ class ActionButton(Button) :
         self.setHoverColour(B_DISABLE_COLOR)
         self.setPressedColour(B_DISABLE_COLOR)
         self.setOnClick(lambda : print("Btn disabled"))
+        self.enable = False
 
 
     def enable_btn(self):
@@ -50,5 +52,6 @@ class ActionButton(Button) :
         self.setHoverColour(B_HOVER_COLOR)
         self.setPressedColour(B_PRESSED_COLOR)
         self.setOnClick(self.action)
+        self.enable = True
 
 

@@ -38,15 +38,16 @@ class Player:
         return tokens_to_add
 
     def raisee(self, table, tokens):
-        tokens -= self.call(table)
+        self.call(table)
         table.add_to_pool(tokens, self)
-        table.game_info.update_b_b(tokens)
+        table.game_info.update_b_b(self.tokens_in_pool)
 
     def fold(self, table):
         table.players_in_round.remove(self)
 
     def allIn(self,table):
-        self.raisee(table,self.tokens)
+        self.call(table)
+        self.raisee(table, self.tokens)
 
     def __repr__(self):
         return "(Name: {0}, Id: {1}, Tokens: {2}, Cards: {3} {4})".format(self.name, self.id, self.tokens,
