@@ -231,13 +231,7 @@ def engine():
         time.sleep(4)
         game_table.new_round()
 
-
-def disconnect_remaining_players():
-    pass
-
-
 if __name__ == "__main__":
     print("[STARTING] server is starting...")
     start()
     engine()
-    disconnect_remaining_players()
