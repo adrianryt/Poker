@@ -1,31 +1,51 @@
 import pygame
-class button():
-    def __init__(self, color, x, y, width, height, text=''):
-        self.color = color
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.text = text
-        self.disabled = False
+from pygame_widgets import Button
 
-    def draw(self, win, outline=None):
-        # Call this method to draw the button on the screen
-        if outline:
-            pygame.draw.rect(win, outline, (self.x - 2, self.y - 2, self.width + 4, self.height + 4), 0)
+B_WIDTH = 100
+B_HEIGHT = 50
+B_FONT = 50
+B_MARGIN = 20
+B_INACTIVE_COLOR = (121, 226, 237)
+B_HOVER_COLOR = (19, 52, 171)
+B_PRESSED_COLOR = (237, 62, 62)
+B_RADIUS = 20
+B_DISABLE_COLOR = (122, 122, 120)
 
-        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.height), 0)
+class ActionButton(Button) :
+    def __init__(self, win, xPos, yPos, text, game_window):
+        self.action_text = text.lower()
+        self.game_window = game_window
+        self.action = self.action_based_on_text(text)
+        super().__init__(win, xPos, yPos, B_WIDTH, B_HEIGHT, text=text,
+                         fontSize=B_FONT, margin=B_MARGIN,
+                         inactiveColour=B_INACTIVE_COLOR,
+                         hoverColour=B_HOVER_COLOR,
+                         pressedColour=B_PRESSED_COLOR, radius=B_RADIUS,
+                         onClick=self.action)
 
-        if self.text != '':
-            font = pygame.font.SysFont('comicsans', 30)
-            text = font.render(self.text, 1, (0, 0, 0))
-            win.blit(text, (
-            self.x + (self.width / 2 - text.get_width() / 2), self.y + (self.height / 2 - text.get_height() / 2)))
+    def action_based_on_text(self, text):
+        if text == "Raise":
+            return self.raise_action
+        else:
+            return self.normal_action
 
-    def isOver(self, pos):
-        # Pos is the mouse position or a tuple of (x,y) coordinates
-        if pos[0] > self.x and pos[0] < self.x + self.width and not self.disabled:
-            if pos[1] > self.y and pos[1] < self.y + self.height:
-                return True
+    def normal_action(self):
+        self.game_window.client.send(self.action_text)
 
-        return False
+    def raise_action(self):
+        pass
+
+    def disable_btn(self):
+        self.setInactiveColour(B_DISABLE_COLOR)
+        self.setHoverColour(B_DISABLE_COLOR)
+        self.setPressedColour(B_DISABLE_COLOR)
+        self.setOnClick(lambda : print("Btn disabled"))
+
+
+    def enable_btn(self):
+        self.setInactiveColour(B_INACTIVE_COLOR)
+        self.setHoverColour(B_HOVER_COLOR)
+        self.setPressedColour(B_PRESSED_COLOR)
+        self.setOnClick(self.action)
+
+

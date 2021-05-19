@@ -5,6 +5,7 @@ import math
 from pygame_widgets import Slider
 import threading
 import time
+from view.button import ActionButton
 
 lock = threading.Lock()
 
@@ -48,36 +49,10 @@ class game_window:
         self.opponents_font = pygame.font.Font(None, 32)
 
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
-
-        self.callButton = Button(
-            self.window, 500, 665 + self.Y_CONF, 100, 50, text='Call!',
-            fontSize=50, margin=20,
-            inactiveColour=(121, 226, 237),
-            hoverColour=(19, 52, 171),
-            pressedColour=(237, 62, 62), radius=20,
-            onClick=self.callAction)
-        self.foldButton = Button(
-            self.window, 400, 665 + self.Y_CONF, 100, 50, text='Fold!',
-            fontSize=50, margin=20,
-            inactiveColour=(121, 226, 237),
-            hoverColour=(19, 52, 171),
-            pressedColour=(237, 62, 62), radius=20,
-            onClick=self.foldAction)
-        self.checkButton = Button(
-            self.window, 300, 665 + self.Y_CONF, 100, 50, text='Check',
-            fontSize=50, margin=20,
-            inactiveColour=(121, 226, 237),
-            hoverColour=(19, 52, 171),
-            pressedColour=(237, 62, 62), radius=20,
-            onClick=self.checkAction)
-        self.allInButton = Button(
-            self.window, 200, 665 + self.Y_CONF, 100, 50, text='All In!',
-            fontSize=50, margin=20,
-            inactiveColour=(121, 226, 237),
-            hoverColour=(19, 52, 171),
-            pressedColour=(237, 62, 62), radius=20,
-            onClickParams=(),
-            onClick=self.allInAction)
+        self.callButton = ActionButton(self.window, 500, 665 + self.Y_CONF, 'Call', self)
+        self.foldButton = ActionButton(self.window, 400, 665 + self.Y_CONF, 'Fold', self)
+        self.checkButton = ActionButton(self.window, 300, 665 + self.Y_CONF, 'Check', self)
+        self.allInButton = ActionButton(self.window, 200, 665 + self.Y_CONF, 'AllIn', self)
 
         self.slider = Slider(self.window, 600, 665 + self.Y_CONF, 150, 50, min=0, max=99, step=1)
         pygame.display.set_caption("PokerGame!")
@@ -185,70 +160,20 @@ class game_window:
         pygame.display.update()
 
     def enable_buttons(self):
-        self.callButton.inactiveColour = (121, 226, 237)
-        self.callButton.hoverColour = (19, 52, 171)
-        self.callButton.pressedColour = (237, 62, 62)
-        self.callButton.onClick = self.callAction
+        #te przyciski zawze mozna wcisnac
+        self.foldButton.enable_btn()
+        self.allInButton.enable_btn()
 
-        self.foldButton.inactiveColour = (121, 226, 237)
-        self.foldButton.hoverColour = (19, 52, 171)
-        self.foldButton.pressedColour = (237, 62, 62)
-        self.foldButton.onClick = self.foldAction
+        self.callButton.enable_btn()
+        self.checkButton.enable_btn()
 
-        self.checkButton.inactiveColour = (121, 226, 237)
-        self.checkButton.hoverColour = (19, 52, 171)
-        self.checkButton.pressedColour = (237, 62, 62)
-        self.checkButton.onClick = self.checkAction
-
-        self.allInButton.inactiveColour = (121, 226, 237)
-        self.allInButton.hoverColour = (19, 52, 171)
-        self.allInButton.pressedColour = (237, 62, 62)
-        self.allInButton.onClick = self.allInAction
 
     def disable_buttons(self):
-        self.callButton.inactiveColour = (122, 122, 120)
-        self.callButton.hoverColour = (122, 122, 120)
-        self.callButton.pressedColour = (122, 122, 120)
-        self.callButton.onClick = lambda: print("Call-disabled")
+        self.checkButton.disable_btn()
+        self.callButton.disable_btn()
+        self.foldButton.disable_btn()
+        self.allInButton.disable_btn()
 
-        self.foldButton.inactiveColour = (122, 122, 120)
-        self.foldButton.hoverColour = (122, 122, 120)
-        self.foldButton.pressedColour = (122, 122, 120)
-        self.foldButton.onClick = lambda: print("Fold-disabled")
-
-        self.checkButton.inactiveColour = (122, 122, 120)
-        self.checkButton.hoverColour = (122, 122, 120)
-        self.checkButton.pressedColour = (122, 122, 120)
-        self.checkButton.onClick = lambda: print("Check-disabled")
-
-        self.allInButton.inactiveColour = (122, 122, 120)
-        self.allInButton.hoverColour = (122, 122, 120)
-        self.allInButton.pressedColour = (122, 122, 120)
-        self.allInButton.onClick = lambda: print("AllIn-disabled")
-
-    def callAction(self):
-        print("CALL - XD")
-        self.client.send("call")
-        self.disable_buttons()
-        #self.ACTION = "call"
-
-    def foldAction(self):
-        print("FOLD - XD")
-        self.client.send("fold")
-        self.disable_buttons()
-        #self.ACTION = "fold"
-
-    def checkAction(self):
-        print("CHECK - XD")
-        self.client.send("check")
-        self.disable_buttons()
-        #self.ACTION = "check"
-
-    def allInAction(self):
-        print("ALLIN - XD")
-        self.client.send("allIn")
-        self.disable_buttons()
-        #self.ACTION = "allIn"
 
     def main(self):
         run = True

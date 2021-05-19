@@ -143,7 +143,7 @@ def round_action(p):
         p.check()
     if what_to_do == "call":
         p.call(game_table)
-    if what_to_do == "allIn":
+    if what_to_do == "allin":
         p.allIn(game_table)
 
     sendClientData([p])  # po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.
