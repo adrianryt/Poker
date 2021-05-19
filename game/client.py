@@ -65,8 +65,8 @@ class Client():
         elif wrapped_msg[0] == "OPPONENTS":  # dostajemy info o wszystkich oponentach
             lock.acquire()
             self.game_window.opponents = wrapped_msg[1]
-            lock.release()
             dict(sorted(self.game_window.opponents.items(), key=lambda item: item[1].id))
+            lock.release()
             print(wrapped_msg[1])
         elif wrapped_msg[0] == "CARDS":
             self.game_window.tableCards = wrapped_msg[1]
@@ -76,6 +76,10 @@ class Client():
             #TODO przydaloby sie gdzie indziej to dac, ale cos nie idzie bo pruje dupe
             self.game_window.tableCards = None
             print(wrapped_msg[1])
+        elif wrapped_msg[0] == "GAME INFO":
+            lock.acquire()
+            self.game_window.game_info = wrapped_msg[1]
+            lock.release()
         else:
             return wrapped_msg[0]
 

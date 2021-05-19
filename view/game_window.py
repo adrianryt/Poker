@@ -44,6 +44,7 @@ class game_window:
         self.player = None
         self.opponents = {}
         self.tableCards = None
+        self.game_info = None
 
         self.client_font = pygame.font.Font(None, 50)
         self.opponents_font = pygame.font.Font(None, 32)
@@ -169,7 +170,7 @@ class game_window:
         self.allInButton.enable_btn()
         self.raiseButton.enable_btn()
 
-        max_bet = max([p.tokens_in_pool for p in self.opponents.values()])
+        max_bet = self.game_info.biggest_bet
         if max_bet == self.player.tokens_in_pool:
             self.checkButton.enable_btn()
         if max_bet > self.player.tokens_in_pool:

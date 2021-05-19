@@ -129,6 +129,11 @@ def sendPlayersLastRound(allPlayers, playersActive):
                 wrapped_msg = wrap_message("OPPONENT", p_a)
                 send_pickle(all_p, wrapped_msg)
 
+def send_game_info(all_players,info):
+    game_info = wrap_message("GAME INFO", info)
+    for p in all_players:
+        send_pickle(p, game_info)
+
 def round_action(p):
     #send(conn_dict[p.id], "CHOOSE MOVE")
     wrapped_msg = wrap_message("CHOOSE MOVE", p)
@@ -156,9 +161,11 @@ def make_round():
     for idx, p in enumerate(itertools.cycle(game_table.players), 1):
         if p in game_table.players_in_round and len(game_table.players_in_round) > 1:
             round_action(p)
+            send_game_info(game_table.players, game_table.game_info)
         if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
                game_table.players_in_round) and idx >= players_number:
             break
+
 
 #Uwagi do silnika:
 #1.Raise do danej ilości mamony i żeby nie przekraczało obecnie posiadanej
@@ -167,6 +174,7 @@ def make_round():
 
 
 def engine():
+    send_game_info(game_table.players, game_table.game_info)
     while True:
         print("NEW ROUND")
         game_table.update_players_in_round()
@@ -183,9 +191,11 @@ def engine():
             for idx, p in enumerate(itertools.cycle(game_table.players), 1):
                 if p in game_table.players_in_round and idx != 1 and idx != 2 and len(game_table.players_in_round) > 1:
                    round_action(p)
+                   send_game_info(game_table.players, game_table.game_info)
                 if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
                        game_table.players_in_round) and idx >= players_number + 2:
                     break
+
 
         print("AFTER FLOP (3karty pokazane na stole)")
         game_table.deal_flop()
