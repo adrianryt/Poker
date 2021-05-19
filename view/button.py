@@ -33,8 +33,12 @@ class ActionButton(Button) :
         self.game_window.client.send(self.action_text)
         self.game_window.disable_buttons()
 
-    def raise_action(self):
-        pass
+    def raise_action(self, tokens):
+        print(tokens)
+        msg = self.action_text + str(tokens)
+        print(msg)
+        self.game_window.client.send(msg)
+        # self.game_window.disable_buttons()
 
     def disable_btn(self):
         self.setInactiveColour(B_DISABLE_COLOR)

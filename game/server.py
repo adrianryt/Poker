@@ -137,13 +137,15 @@ def round_action(p):
     what_to_do = recive(conn_dict[p.id])
     if what_to_do == "fold":
         p.fold(game_table)
-    if what_to_do == "raise":
-        p.raisee(game_table, 100)
-    if what_to_do == "check":
+    elif what_to_do.startswith("raise"):
+        print(what_to_do)
+        tokens = what_to_do[5:]
+        p.raisee(game_table, int(tokens))
+    elif what_to_do == "check":
         p.check()
-    if what_to_do == "call":
+    elif what_to_do == "call":
         p.call(game_table)
-    if what_to_do == "allin":
+    elif what_to_do == "allin":
         p.allIn(game_table)
 
     sendClientData([p])  # po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.

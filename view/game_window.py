@@ -97,6 +97,8 @@ class game_window:
         pygame.draw.circle(self.window, (0,255,0), (self.WIDTH/3, self.HEIGHT/2 + self.Y_CONF), self.TABLE_RADIUS)
         #player_drawing
         if self.player is not None:
+            self.slider.__setattr__("min", 10)
+            self.slider.__setattr__("max", self.player.tokens)
             card1 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(self.player.cards[0].get_card_in_int())))
             card1 = self.transform_img(card1,70,105)
             self.window.blit(card1,(self.WIDTH/3 - 70, self.HEIGHT - 240 + self.Y_CONF))
@@ -158,13 +160,14 @@ class game_window:
                 x_offset += 70
 
         pygame.draw.rect(self.window, self.BLACK, self.BORDER)
-        pygame.time.Clock().tick(self.FPS)
-        pygame.display.update()
+        # pygame.time.Clock().tick(self.FPS)
+        # pygame.display.update()
 
     def enable_buttons(self):
         #te przyciski zawze mozna wcisnac
         self.foldButton.enable_btn()
         self.allInButton.enable_btn()
+        self.raiseButton.enable_btn()
 
         self.callButton.enable_btn()
         self.checkButton.enable_btn()
@@ -175,6 +178,7 @@ class game_window:
         self.callButton.disable_btn()
         self.foldButton.disable_btn()
         self.allInButton.disable_btn()
+        self.raiseButton.disable_btn()
 
 
     def main(self):
@@ -205,6 +209,8 @@ class game_window:
 
             self.raiseNumberBox.setText(self.slider.getValue())
             self.raiseNumberBox.draw()
+            self.raiseButton.setOnClick(self.raiseButton.action, [self.slider.getValue()])
+            pygame.time.Clock().tick(self.FPS)
             pygame.display.update()
 
     def login(self):
