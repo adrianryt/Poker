@@ -172,8 +172,8 @@ class game_window:
         max_bet = max([p.tokens_in_pool for p in self.opponents.values()])
         if max_bet == self.player.tokens_in_pool:
             self.checkButton.enable_btn()
-
-        self.callButton.enable_btn()
+        if max_bet > self.player.tokens_in_pool:
+            self.callButton.enable_btn()
 
 
 
