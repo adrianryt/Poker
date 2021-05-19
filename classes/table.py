@@ -55,8 +55,6 @@ class Table:
         while self.pool > 0:
             minimal_bet = min([p.tokens_in_pool for p in self.players_in_round])
             current_pool = 0
-            print(self.players)
-            print(minimal_bet)
             for p in self.players:
                 if p.tokens_in_pool > minimal_bet:
                     current_pool += minimal_bet
@@ -65,12 +63,9 @@ class Table:
                     current_pool += p.tokens_in_pool
                     p.tokens_in_pool = 0
                 print(p, current_pool)
-            print(self.players)
-            winners = point_the_winner(self.players_in_round, self.tableCards)
+            winners += point_the_winner(self.players_in_round, self.tableCards)
             print(winners)
             self.give_prize_tw(winners, current_pool)
-            # for p in self.players_in_round:
-            #     p.tokens_in_pool -= minimal_bet
             self.players_in_round = [p for p in self.players_in_round if p.tokens_in_pool > 0]
             #print(self.players_in_round)
             #print(self.pool)
