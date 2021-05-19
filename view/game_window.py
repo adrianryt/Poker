@@ -2,7 +2,7 @@ import pygame
 import os
 from pygame_widgets import Button
 import math
-from pygame_widgets import Slider
+from pygame_widgets import Slider, TextBox
 import threading
 import time
 from view.button import ActionButton
@@ -49,12 +49,14 @@ class game_window:
         self.opponents_font = pygame.font.Font(None, 32)
 
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
-        self.callButton = ActionButton(self.window, 500, 665 + self.Y_CONF, 'Call', self)
+        self.callButton = ActionButton(self.window, 100, 665 + self.Y_CONF, 'Call', self)
         self.foldButton = ActionButton(self.window, 400, 665 + self.Y_CONF, 'Fold', self)
         self.checkButton = ActionButton(self.window, 300, 665 + self.Y_CONF, 'Check', self)
         self.allInButton = ActionButton(self.window, 200, 665 + self.Y_CONF, 'AllIn', self)
+        self.raiseButton = ActionButton(self.window, 500, 665 + self.Y_CONF, "Raise", self)
 
-        self.slider = Slider(self.window, 600, 665 + self.Y_CONF, 150, 50, min=0, max=99, step=1)
+        self.slider = Slider(self.window, 600, 565 + self.Y_CONF, 150, 30, min=0, max=99, step=1)
+        self.raiseNumberBox = TextBox(self.window, 600,  665 + self.Y_CONF, 100, 50, fontSize=30)
         pygame.display.set_caption("PokerGame!")
 
     def update_opponent(self,l_player):
@@ -196,8 +198,13 @@ class game_window:
             self.checkButton.draw()
             self.allInButton.listen(events)
             self.allInButton.draw()
+            self.raiseButton.listen(events)
+            self.raiseButton.draw()
             self.slider.listen(events)
             self.slider.draw()
+
+            self.raiseNumberBox.setText(self.slider.getValue())
+            self.raiseNumberBox.draw()
             pygame.display.update()
 
     def login(self):
@@ -257,6 +264,6 @@ class game_window:
             pygame.display.update()
 
 if __name__ == "__main__":
-    game_window = game_window()
+    game_window = game_window(None)
     game_window.login()
     game_window.main()
