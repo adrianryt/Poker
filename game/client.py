@@ -8,7 +8,7 @@ HEADER = 64
 PORT = 5051
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.0.52"
+SERVER = "192.168.65.183"
 ADDR = (SERVER, PORT)
 
 
@@ -75,6 +75,7 @@ class Client():
             print("WINNERS:")
             #TODO przydaloby sie gdzie indziej to dac, ale cos nie idzie bo pruje dupe
             self.game_window.tableCards = None
+            self.game_window.update_history(wrapped_msg[1])
             print(wrapped_msg[1])
         elif wrapped_msg[0] == "GAME INFO":
             lock.acquire()
