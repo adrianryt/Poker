@@ -22,6 +22,7 @@ server.bind(ADDR)
 game_info = GameInfo(10,30)
 game_table = Table(game_info)
 conn_dict = {}
+players_to_remove = []
 
 LIMIT = int(input("Podaj liczbe graczy"))
 
@@ -31,9 +32,22 @@ def recive(conn):
         msg_length = int(msg_length)
         msg = conn.recv(msg_length).decode(FORMAT)
         if msg == DISCONNECT_MESSAGE:
-            conn.send("Leaving message".encode(FORMAT))
+            #conn.send("Leaving message".encode(FORMAT))
+            print("Server: Dostałem DISCONNECT message od: ",conn)
             #przydolby sie usuwac z dicta rozlaczonego gracza
-            conn.close()
+            idx = None
+            p = None
+            for key, val in conn_dict.items():
+                if(val == conn):
+                    idx = key
+                    print("IDX TO REMOVE: ", idx)
+            for player in game_table.players:
+                if player.id == idx:
+                    p = player
+            print("Player to remove: ", p)
+            players_to_remove.append(p)
+            #game_table.players_in_round.remove(p)
+            return msg
         else:
             return msg
 
@@ -141,7 +155,9 @@ def round_action(p):
     wrapped_msg = wrap_message("CHOOSE MOVE", p)
     send_pickle(p, wrapped_msg)
     #on tutaj czeka na odpowiedz - czyli na klikniecie buttona
+    print("CONN_DICT ID:",conn_dict[p.id])
     what_to_do = recive(conn_dict[p.id])
+    print("What to do",what_to_do)
     if what_to_do == "fold":
         p.fold(game_table)
     elif what_to_do.startswith("raise"):
@@ -154,6 +170,8 @@ def round_action(p):
         p.call(game_table)
     elif what_to_do == "allin":
         p.allIn(game_table)
+    else: #to dla !DISCONNECT
+        p.fold(game_table)
 
     sendClientData([p])  # po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.
     sendDataToRivals(game_table.players, p)
@@ -168,16 +186,23 @@ def make_round():
                game_table.players_in_round) and idx >= players_number:
             break
 
-
-#Uwagi do silnika:
-#1.Raise do danej ilości mamony i żeby nie przekraczało obecnie posiadanej
-#2.Check musi być czasami wyłączony - chyba da się to zrobić sprawdzając czy poprzedni gracz ma tyle samo "token_in_pool" co gracz na ruchu
-#3.Opcja allIn - On powinien cały czas być w grze ale już mi się łeb kopci i nie wiem
-
+def update_game_players():
+    global players_to_remove
+    print("USUWAM GRACZA Z LISTY")
+    for p in players_to_remove:
+        game_table.remove_player(p)
+        wrapped_msg = wrap_message(DISCONNECT_MESSAGE, p)
+        send_pickle(p, wrapped_msg)
+        conn = conn_dict.pop(p.id)
+        conn.close()
+    players_to_remove = []
 
 def engine():
     send_game_info(game_table.players, game_table.game_info, game_table.pool)
     while True:
+        if(len(game_table.players) <= 1):
+            #TODO TUTAJ JAK ZOSTANIE JEDNA OSOBA TO TRZEBA JA ROZLACZYC
+            break
         print("NEW ROUND")
         game_table.update_players_in_round()
         # tutaj pobieramy small i big blinda od odpowiednich osob, ostatnia osoba w liscie jest dealerem
@@ -229,6 +254,7 @@ def engine():
         sendWhoWon(game_table.players, winners)
         #TODO delete this
         time.sleep(4)
+        update_game_players()
         game_table.new_round()
 
 if __name__ == "__main__":

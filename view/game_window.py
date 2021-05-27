@@ -49,8 +49,7 @@ class game_window:
 
         self.client_font = pygame.font.Font(None, 50)
         self.opponents_font = pygame.font.Font(None, 32)
-        self.history = ["Your game stat: "]
-        self.history_surface = [pygame.font.Font(None, 24).render(text, True, self.BLACK) for text in self.history]
+        self.history_surface = [pygame.font.Font(None, 24).render("Your game stat: ", True, self.BLACK)]
 
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.callButton = ActionButton(self.window, 100, 665 + self.Y_CONF, 'Call', self)
@@ -102,7 +101,7 @@ class game_window:
         #player_drawing
         if self.player is not None:
             self.slider.__setattr__("min", self.game_info.big_blind)
-            self.slider.__setattr__("max", (self.player.tokens - self.game_info.biggest_bet) if (self.player.tokens - self.game_info.biggest_bet) > self.game_info.big_blind else self.game_info.big_blind+1)
+            self.slider.__setattr__("max", self.player.tokens - self.game_info.biggest_bet)
             card1 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(self.player.cards[0].get_card_in_int())))
             card1 = self.transform_img(card1,70,105)
             self.window.blit(card1,(self.WIDTH/3 - 70, self.HEIGHT - 240 + self.Y_CONF))
@@ -202,14 +201,10 @@ class game_window:
     def update_history(self, winners):
         #winners to limited players dlatego sprawdzam po id
         if self.player.id in [winner.id for winner in winners]:
-            self.history.append("win - " + str(self.pool))
-            tmp = "win - " + str(self.pool)
+            tmp = "win - " + str(self.pool - self.player.tokens_in_pool)
         else:
-            self.history.append("lose - " + str(self.player.tokens_in_pool))
             tmp = "lose - " + str(self.player.tokens_in_pool)
-
         self.history_surface.append(pygame.font.Font(None, 24).render(tmp, True, self.BLACK))
-
         #na stacku piszą że surface dla textu nie obsługuje nowych lini
         #więc trzeba zrobić tablice stringów i je wypisywać jeden pod drugim
         #https://stackoverflow.com/questions/32590131/pygame-blitting-text-with-an-escape-character-or-newline
@@ -220,7 +215,7 @@ class game_window:
         N = len(self.history_surface)
         if Y + (N*24) + (15*N) >= self.HEIGHT:
             self.history_surface.pop(1)
-        for line in range(N):                #v - fontsize
+        for line in range(N):                                        #v - fontsize
             self.window.blit(self.history_surface[line],(X,Y + (line*24) + (15*line)))
 
     def main(self):
@@ -232,6 +227,9 @@ class game_window:
                 if event.type == pygame.QUIT:
                     run = False
                     #TODO tu obsluzyc jak sie chce rozlaczyc bedzie uciazliwe to chyba zeby game loopa nie popsuc
+                    self.client.to_disconnect = True
+                    if self.client.your_move:
+                        self.client.disconnect_at_move()
                     pygame.quit()
                     quit()
 
