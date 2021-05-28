@@ -190,13 +190,13 @@ def make_round():
 
 def update_game_players():
     global players_to_remove
+    print(conn_dict)
     print("USUWAM GRACZY Z LISTY")
     for p in players_to_remove:
         wrapped_msg = wrap_message(DISCONNECT_MESSAGE, None)
         send_pickle(p, wrapped_msg)
-        game_table.remove_player(p)
-        wrapped_msg = wrap_message(DISCONNECT_MESSAGE, p)
-        send_pickle(p, wrapped_msg)
+        if p in game_table.players:
+            game_table.remove_player(p)
         conn = conn_dict.pop(p.id)
         conn.close()
         print(p)
@@ -205,13 +205,16 @@ def update_game_players():
 def engine():
     #TODO te globale to wywalic trzeba, latwiej bedzie chyba na klase to jebnac, lub przekazywac odpowiedznie dane do funkcji bo chuj wi co sie dzieje
     global players_to_remove
+    global conn_dict
     send_game_info(game_table.players, game_table.game_info, game_table.pool)
     while True:
         if(len(game_table.players) <= 1):
             #TODO TUTAJ JAK ZOSTANIE JEDNA OSOBA TO TRZEBA JA ROZLACZYC
-            print(game_table.players)
-            players_to_remove.append(p)
-            update_game_players()
+            for p in game_table.players:
+                wrapped_msg = wrap_message("GAME ENDED", None)
+                send_pickle(p, wrapped_msg)
+                conn = conn_dict.pop(p.id)
+                conn.close()
             break
         print("NEW ROUND")
         game_table.update_players_in_round()
@@ -264,8 +267,19 @@ def engine():
         sendWhoWon(game_table.players, winners)
         #TODO delete this
         time.sleep(4)
+        #tu nam zwraca liste graczy ktorzy przegrali, tj maja 0 zetonow
+        players_to_dc = game_table.new_round()
+        ##TODO stworzyc z tego funkcje
+        for p in players_to_dc:
+            wrapped_msg = wrap_message("GAME ENDED", None)
+            send_pickle(p, wrapped_msg)
+            conn = conn_dict.pop(p.id)
+            conn.close()
+            print(conn_dict, "DICT")
+            print("USUNALEM", p.id)
         update_game_players()
-        game_table.new_round()
+
+
 
 if __name__ == "__main__":
     print("[STARTING] server is starting...")

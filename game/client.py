@@ -20,6 +20,7 @@ class Client():
         self.connected = True
         self.to_disconnect = False
         self.your_move = False
+        self.game_end = False
 
     def send(self,msg):
         message = msg.encode(FORMAT)
@@ -87,6 +88,10 @@ class Client():
             lock.acquire()
             self.game_window.pool = wrapped_msg[1]
             lock.release()
+        elif wrapped_msg[0] == "GAME ENDED":
+            self.game_end = True
+            self.client.close()
+            self.connected = False
         else:
             return wrapped_msg[0]
 

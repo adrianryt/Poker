@@ -220,6 +220,13 @@ class game_window:
         for line in range(N):                                        #v - fontsize
             self.window.blit(self.history_surface[line],(X,Y + (line*24) + (15*line)))
 
+    def end(self):
+        self.window.fill(self.BACKGROUND)
+        player_tokens_surface = self.opponents_font.render(str(self.player.tokens), True, (0, 0, 0))
+        self.window.blit(player_tokens_surface, (self.WIDTH / 3, self.HEIGHT - 275 + self.Y_CONF))
+        pygame.time.Clock().tick(self.FPS)
+        pygame.display.update()
+
     def main(self):
         run = True
         while run:
@@ -231,32 +238,35 @@ class game_window:
                     run = False
                     #TODO tu obsluzyc jak sie chce rozlaczyc bedzie uciazliwe to chyba zeby game loopa nie popsuc
                     self.client.to_disconnect = True
-                    if self.client.your_move:
+
+                    if self.client.your_move and not self.client.game_end:
                         self.client.disconnect_at_move()
                     pygame.quit()
                     quit()
+            if self.client.game_end:
+                self.end()
+            else:
+                self.draw_window()
+                self.draw_history()
+                self.callButton.listen(events)
+                self.callButton.draw()
+                self.foldButton.listen(events)
+                self.foldButton.draw()
+                self.checkButton.listen(events)
+                self.checkButton.draw()
+                self.allInButton.listen(events)
+                self.allInButton.draw()
+                self.raiseButton.listen(events)
+                self.raiseButton.draw()
+                self.slider.listen(events)
+                self.slider.draw()
 
-            self.draw_window()
-            self.draw_history()
-            self.callButton.listen(events)
-            self.callButton.draw()
-            self.foldButton.listen(events)
-            self.foldButton.draw()
-            self.checkButton.listen(events)
-            self.checkButton.draw()
-            self.allInButton.listen(events)
-            self.allInButton.draw()
-            self.raiseButton.listen(events)
-            self.raiseButton.draw()
-            self.slider.listen(events)
-            self.slider.draw()
-
-            self.raiseNumberBox.setText(self.slider.getValue())
-            self.raiseNumberBox.draw()
-            if self.raiseButton.enable:
-                self.raiseButton.setOnClick(self.raiseButton.action, [self.slider.getValue()])
-            pygame.time.Clock().tick(self.FPS)
-            pygame.display.update()
+                self.raiseNumberBox.setText(self.slider.getValue())
+                self.raiseNumberBox.draw()
+                if self.raiseButton.enable:
+                    self.raiseButton.setOnClick(self.raiseButton.action, [self.slider.getValue()])
+                pygame.time.Clock().tick(self.FPS)
+                pygame.display.update()
 
     def login(self):
         width = 800

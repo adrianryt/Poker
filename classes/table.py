@@ -13,6 +13,7 @@ class Table:
         self.pool = 0
         self.tableCards: List[Card] = []
         self.players_in_round: List[Player] = []
+        self.players_lost: List[Player] = []
         self.game_info: GameInfo = game_info
 
 
@@ -32,9 +33,14 @@ class Table:
         self.players.remove(player)
 
     def remove_players(self):
+        players_to_disconnect = []
         for p in self.players:
             if p.tokens == 0:
+                players_to_disconnect.append(p)
                 self.remove_player(p)
+        return players_to_disconnect
+
+
 
     #every new round
     def update_players_in_round(self):
@@ -102,8 +108,9 @@ class Table:
         self.remove_cards_table()
         self.deck.push_cards()
         self.game_info.clear_b_b()
-        self.remove_players()
+        players_to_disconnect = self.remove_players()
         self.move_dealer()
+        return players_to_disconnect
 
 
 
