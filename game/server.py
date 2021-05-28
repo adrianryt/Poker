@@ -33,7 +33,7 @@ def recive(conn):
         msg = conn.recv(msg_length).decode(FORMAT)
         if msg == DISCONNECT_MESSAGE:
             #conn.send("Leaving message".encode(FORMAT))
-            print("Server: Dostałem DISCONNECT message od: ",conn)
+            # print("Server: Dostałem DISCONNECT message od: ",conn)
             #przydolby sie usuwac z dicta rozlaczonego gracza
             idx = None
             p = None
@@ -46,6 +46,7 @@ def recive(conn):
                     p = player
             print("Player to remove: ", p)
             players_to_remove.append(p)
+            print("players to remove: ", players_to_remove)
             #game_table.players_in_round.remove(p)
             return msg
         else:
@@ -155,13 +156,12 @@ def round_action(p):
     wrapped_msg = wrap_message("CHOOSE MOVE", p)
     send_pickle(p, wrapped_msg)
     #on tutaj czeka na odpowiedz - czyli na klikniecie buttona
-    print("CONN_DICT ID:",conn_dict[p.id])
+    # print("CONN_DICT ID:",conn_dict[p.id])
     what_to_do = recive(conn_dict[p.id])
-    print("What to do",what_to_do)
+    # print("What to do",what_to_do)
     if what_to_do == "fold":
         p.fold(game_table)
     elif what_to_do.startswith("raise"):
-        print(what_to_do)
         tokens = what_to_do[5:]
         p.raisee(game_table, int(tokens))
     elif what_to_do == "check":
@@ -188,20 +188,26 @@ def make_round():
 
 def update_game_players():
     global players_to_remove
-    print("USUWAM GRACZA Z LISTY")
+    print("USUWAM GRACZY Z LISTY")
     for p in players_to_remove:
         game_table.remove_player(p)
         wrapped_msg = wrap_message(DISCONNECT_MESSAGE, p)
         send_pickle(p, wrapped_msg)
         conn = conn_dict.pop(p.id)
         conn.close()
+        print(p)
     players_to_remove = []
 
 def engine():
+    #TODO te globale to wywalic trzeba, latwiej bedzie chyba na klase to jebnac, lub przekazywac odpowiedznie dane do funkcji bo chuj wi co sie dzieje
+    global players_to_remove
     send_game_info(game_table.players, game_table.game_info, game_table.pool)
     while True:
         if(len(game_table.players) <= 1):
             #TODO TUTAJ JAK ZOSTANIE JEDNA OSOBA TO TRZEBA JA ROZLACZYC
+            print(game_table.players)
+            players_to_remove.append(p)
+            update_game_players()
             break
         print("NEW ROUND")
         game_table.update_players_in_round()
@@ -225,22 +231,22 @@ def engine():
                     break
 
 
-        print("AFTER FLOP (3karty pokazane na stole)")
+        # print("AFTER FLOP (3karty pokazane na stole)")
         game_table.deal_flop()
         sendCardsOnTable(game_table.players)
         time.sleep(3)
-        print(game_table.players_in_round)
+        # print(game_table.players_in_round)
         if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
             make_round()
 
-        print("AFTER TURN (kolejna karta na stole)")
+        # print("AFTER TURN (kolejna karta na stole)")
         game_table.deal_turn_river()
         sendCardsOnTable(game_table.players)
         time.sleep(3)
         if len(game_table.players_in_round) > 1 and any(p.tokens > 0 for p in game_table.players_in_round):
            make_round()
 
-        print("AFTER RIVER (kolejna karta na stole)")
+        # print("AFTER RIVER (kolejna karta na stole)")
         game_table.deal_turn_river()
         sendCardsOnTable(game_table.players)
         time.sleep(3)
@@ -250,7 +256,7 @@ def engine():
         sendPlayersLastRound(game_table.players, game_table.players_in_round)
         time.sleep(5)
         winners = game_table.reveal_winners()
-        print(winners, "DDDDDDD")
+        # print(winners, "DDDDDDD")
         sendWhoWon(game_table.players, winners)
         #TODO delete this
         time.sleep(4)
