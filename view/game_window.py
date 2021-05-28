@@ -64,6 +64,7 @@ class game_window:
         pygame.display.set_caption("PokerGame!")
 
     def update_opponent(self,l_player):
+
         self.opponents.update({l_player.id:l_player})
 
     def transform_img(self, img, a,b):

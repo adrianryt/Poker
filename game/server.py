@@ -138,11 +138,13 @@ def sendRivalsData(players):
 
 #TODO zmienic nazwe narazie nie mam pomyslu, to wysylamy po ostatniej rundzie
 def sendPlayersLastRound(allPlayers, playersActive):
-    for all_p in allPlayers:
-        for p_a in playersActive:
-            if p_a != all_p:
-                wrapped_msg = wrap_message("OPPONENT", p_a)
-                send_pickle(all_p, wrapped_msg)
+    if len(playersActive) > 1:
+        for all_p in allPlayers:
+            for p_a in playersActive:
+                if p_a != all_p:
+
+                    wrapped_msg = wrap_message("OPPONENT", p_a)
+                    send_pickle(all_p, wrapped_msg)
 
 def send_game_info(all_players,info, tokens_pool):
     game_info = wrap_message("GAME INFO", info)
