@@ -49,7 +49,8 @@ class game_window:
 
         self.client_font = pygame.font.Font(None, 50)
         self.opponents_font = pygame.font.Font(None, 32)
-        self.history_surface = [pygame.font.Font(None, 24).render("Your game stat: ", True, self.BLACK)]
+        self.history_font = pygame.font.Font(None, 24)
+        self.history_surface = [self.history_font.render("Your game stat: ", True, self.BLACK)]
 
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.callButton = ActionButton(self.window, 100, 665 + self.Y_CONF, 'Call', self)
@@ -204,7 +205,7 @@ class game_window:
             tmp = "win - " + str(self.pool - self.player.tokens_in_pool)
         else:
             tmp = "lose - " + str(self.player.tokens_in_pool)
-        self.history_surface.append(pygame.font.Font(None, 24).render(tmp, True, self.BLACK))
+        self.history_surface.append(self.history_font.render(tmp, True, self.BLACK))
         #na stacku piszą że surface dla textu nie obsługuje nowych lini
         #więc trzeba zrobić tablice stringów i je wypisywać jeden pod drugim
         #https://stackoverflow.com/questions/32590131/pygame-blitting-text-with-an-escape-character-or-newline
@@ -221,6 +222,7 @@ class game_window:
     def main(self):
         run = True
         while run:
+
             pygame.time.Clock().tick(self.FPS)
             events = pygame.event.get()
             for event in events:

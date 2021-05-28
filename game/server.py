@@ -190,6 +190,8 @@ def update_game_players():
     global players_to_remove
     print("USUWAM GRACZY Z LISTY")
     for p in players_to_remove:
+        wrapped_msg = wrap_message(DISCONNECT_MESSAGE, None)
+        send_pickle(p, wrapped_msg)
         game_table.remove_player(p)
         wrapped_msg = wrap_message(DISCONNECT_MESSAGE, p)
         send_pickle(p, wrapped_msg)
