@@ -56,6 +56,7 @@ class Table:
             winner.add_tokens(tokens_to_add)
         self.pool -= curr_pool
 
+
     def reveal_winners(self):
         winners = []
         while self.pool > 0:

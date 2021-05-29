@@ -103,7 +103,11 @@ class game_window:
         #player_drawing
         if self.player is not None:
             self.slider.__setattr__("min", self.game_info.big_blind)
-            self.slider.__setattr__("max", self.player.tokens - self.game_info.biggest_bet)
+            if self.player.tokens - (self.game_info.biggest_bet - self.player.tokens_in_pool) == self.game_info.big_blind:
+                self.slider.__setattr__("min", self.game_info.big_blind + 1)
+            else:
+                self.slider.__setattr__("max", self.player.tokens - (self.game_info.biggest_bet - self.player.tokens_in_pool))
+
             card1 = pygame.image.load(os.path.join('../Assets/cards', cardDict.get(self.player.cards[0].get_card_in_int())))
             card1 = self.transform_img(card1,70,105)
             self.window.blit(card1,(self.WIDTH/3 - 70, self.HEIGHT - 240 + self.Y_CONF))
@@ -202,8 +206,13 @@ class game_window:
 
     def update_history(self, winners):
         #winners to limited players dlatego sprawdzam po id
-        if self.player.id in [winner.id for winner in winners]:
-            tmp = "win - " + str(self.pool - self.player.tokens_in_pool)
+        curr_tokens = None
+        for idx,winner in enumerate(winners):
+            if winner.id == self.player.id:
+                curr_tokens = winner.tokens
+
+        if curr_tokens != None:
+            tmp = "win - " + str(curr_tokens - (self.player.tokens_in_pool + self.player.tokens))
         else:
             tmp = "lose - " + str(self.player.tokens_in_pool)
         self.history_surface.append(self.history_font.render(tmp, True, self.BLACK))
@@ -222,8 +231,8 @@ class game_window:
 
     def end(self):
         self.window.fill(self.BACKGROUND)
-        player_tokens_surface = self.opponents_font.render(str(self.player.tokens), True, (0, 0, 0))
-        self.window.blit(player_tokens_surface, (self.WIDTH / 3, self.HEIGHT - 275 + self.Y_CONF))
+        player_tokens_surface = self.opponents_font.render("You have: " + str(self.player.tokens) + "tokens", True, (0, 0, 0))
+        self.window.blit(player_tokens_surface, (self.WIDTH / 3, self.HEIGHT - 400 + self.Y_CONF))
         pygame.time.Clock().tick(self.FPS)
         pygame.display.update()
 
@@ -308,7 +317,7 @@ class game_window:
         msg = "WAITING FOR PLAYERS"
         height = 50
         width = 500
-        msg_input = pygame.Rect(self.WIDTH / 2, self.HEIGHT / 2 , width, height)
+        msg_input = pygame.Rect(self.WIDTH / 3, self.HEIGHT / 2, width, height)
         while run:
             self.window.fill(self.BACKGROUND)
             for event in pygame.event.get():
