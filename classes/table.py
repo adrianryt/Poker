@@ -34,10 +34,14 @@ class Table:
 
     def remove_players(self):
         players_to_disconnect = []
+        print(self.players, "CO JEST")
         for p in self.players:
+            print(p, p.tokens, "USUWANIE GRACZY ZE STOLU")
             if p.tokens == 0:
+                print(p, "ELO")
                 players_to_disconnect.append(p)
-                self.remove_player(p)
+        for p in players_to_disconnect:
+            self.remove_player(p)
         return players_to_disconnect
 
 
@@ -47,8 +51,12 @@ class Table:
         self.players_in_round = self.players.copy()
 
     def add_to_pool(self, tokens, player: Player):
-        self.pool += tokens
-        player.remove_tokens(tokens)
+        if player.tokens < tokens:
+            self.pool += player.tokens
+            player.remove_tokens(player.tokens)
+        else:
+            self.pool += tokens
+            player.remove_tokens(tokens)
 
     def give_prize_tw(self, winnners: List[Player], curr_pool):
         for winner in winnners:

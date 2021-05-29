@@ -269,6 +269,7 @@ def engine():
         time.sleep(4)
         #tu nam zwraca liste graczy ktorzy przegrali, tj maja 0 zetonow
         players_to_dc = game_table.new_round()
+        print(players_to_dc, "HALOOOOOO")
         ##TODO stworzyc z tego funkcje
         for p in players_to_dc:
             wrapped_msg = wrap_message("GAME ENDED", None)

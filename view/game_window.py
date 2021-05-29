@@ -104,7 +104,7 @@ class game_window:
         if self.player is not None:
             self.slider.__setattr__("min", self.game_info.big_blind)
             if self.player.tokens - (self.game_info.biggest_bet - self.player.tokens_in_pool) == self.game_info.big_blind:
-                self.slider.__setattr__("min", self.game_info.big_blind + 1)
+                self.slider.__setattr__("max", self.game_info.big_blind + 1)
             else:
                 self.slider.__setattr__("max", self.player.tokens - (self.game_info.biggest_bet - self.player.tokens_in_pool))
 
