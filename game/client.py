@@ -89,6 +89,7 @@ class Client():
             self.game_window.pool = wrapped_msg[1]
             lock.release()
         elif wrapped_msg[0] == "GAME ENDED":
+            print(self.game_window.player)
             self.game_end = True
             self.client.close()
             self.connected = False

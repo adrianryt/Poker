@@ -208,6 +208,7 @@ def engine():
     global conn_dict
     send_game_info(game_table.players, game_table.game_info, game_table.pool)
     while True:
+        sendClientData(game_table.players)
         if(len(game_table.players) <= 1):
             #TODO TUTAJ JAK ZOSTANIE JEDNA OSOBA TO TRZEBA JA ROZLACZYC
             for p in game_table.players:
@@ -269,15 +270,13 @@ def engine():
         time.sleep(4)
         #tu nam zwraca liste graczy ktorzy przegrali, tj maja 0 zetonow
         players_to_dc = game_table.new_round()
-        print(players_to_dc, "HALOOOOOO")
+        print(game_table.players, "PLAYERS")
         ##TODO stworzyc z tego funkcje
         for p in players_to_dc:
             wrapped_msg = wrap_message("GAME ENDED", None)
             send_pickle(p, wrapped_msg)
             conn = conn_dict.pop(p.id)
             conn.close()
-            print(conn_dict, "DICT")
-            print("USUNALEM", p.id)
         update_game_players()
 
 
