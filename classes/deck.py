@@ -5,7 +5,7 @@ from classes.card import Card
 class Deck:
     def __init__(self):
         self.deck = [Card(rank, suit) for rank in range(2, 15) for suit in range(0, 4)]
-        self.poppedCards = []
+        self.popped_cards = []
         self.shuffle()
 
     def shuffle(self):
@@ -13,7 +13,7 @@ class Deck:
 
     def pop_card(self):
         card = self.deck.pop()
-        self.poppedCards.append(card)
+        self.popped_cards.append(card)
         return card
 
     def pop_cards(self, n):
@@ -23,8 +23,8 @@ class Deck:
         return cards
 
     def push_cards(self):
-        self.deck.extend(self.poppedCards)
-        self.poppedCards.clear()
+        self.deck.extend(self.popped_cards)
+        self.popped_cards.clear()
         self.shuffle()
 
 
