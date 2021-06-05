@@ -171,7 +171,7 @@ def round_action(p):
     elif what_to_do == "call":
         p.call(game_table)
     elif what_to_do == "allin":
-        p.allIn(game_table)
+        p.all_in(game_table)
     else: #to dla !DISCONNECT
         p.fold(game_table)
 

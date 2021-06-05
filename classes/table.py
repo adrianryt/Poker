@@ -50,7 +50,7 @@ class Table:
     def update_players_in_round(self):
         self.players_in_round = self.players.copy()
 
-    def add_to_pool(self, tokens, player: Player):
+    def add_to_pool(self, tokens, player):
         if player.tokens < tokens:
             self.pool += player.tokens
             player.remove_tokens(player.tokens)

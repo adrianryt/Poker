@@ -9,6 +9,7 @@ class GameInfo:
         self.small_blind = new_val
         self.big_blind = 2 * self.small_blind
 
+    # new_b_b - new_biggest_blind
     def update_b_b(self, new_b_b):
         if new_b_b > self.biggest_bet:
             self.biggest_bet = new_b_b

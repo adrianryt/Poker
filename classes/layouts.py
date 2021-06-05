@@ -1,16 +1,16 @@
 from classes.card import Card
 from classes.player import Player
 
-def straight_flush_5_A(hand):
+def straight_flush_A_5(hand):
     suits = [[] for _ in range(4)]
     for c in hand:
         suits[c.get_suit()].append(c)
     for suited_cards in suits:
-        if len(suited_cards) >= 5 and straight_5_A(suited_cards):
-            return straight_5_A(suited_cards)
+        if len(suited_cards) >= 5 and straight_A_5(suited_cards):
+            return straight_A_5(suited_cards)
     return False
 
-def straight_5_A(hand):
+def straight_A_5(hand):
     ranks = [x.get_rank() for x in hand]
     if 5 in ranks and 4 in ranks and 3 in ranks and 2 in ranks and 14 in ranks:
 
@@ -26,7 +26,7 @@ def straight_5_A(hand):
 
 
 
-def evel_hand(hand):  #7-cards
+def evaluate_hand(hand):  #7-cards
     NO_PAIR = 0
     PAIR = 1
     TWO_PAIR = 2
@@ -59,8 +59,8 @@ def evel_hand(hand):  #7-cards
                     res_cards = [suits[sorted_cards[i].get_suit()][j]]
 
     #looking for straight_flush from 5 to A
-    if straight_flush_5_A(sorted_cards):
-        return STRAIGHT_FLUSH, straight_flush_5_A(sorted_cards)
+    if straight_flush_A_5(sorted_cards):
+        return STRAIGHT_FLUSH, straight_flush_A_5(sorted_cards)
 
     #looking for Quads
     quads_counter = 1
@@ -126,8 +126,8 @@ def evel_hand(hand):  #7-cards
             straight_counter = 1
             res_cards = [sorted_cards[i]]
 
-    if straight_5_A(sorted_cards):
-        return STRAIGHT, straight_5_A(sorted_cards)
+    if straight_A_5(sorted_cards):
+        return STRAIGHT, straight_A_5(sorted_cards)
 
     #looking for TRIPS
     if three_same_valued_cards:
@@ -198,7 +198,7 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
     players_hands = []
 
     for j in range(n):
-        tmp = evel_hand(table_cards + players[j].cards)
+        tmp = evaluate_hand(table_cards + players[j].cards)
         players_hands.append(tmp[1])
         players_hand_value.append(tmp[0])
 
@@ -250,11 +250,11 @@ if __name__ == "__main__":
     table.append(card3)
     table.append(card4)
     table.append(card5)
-    print(evel_hand(players[0].cards + table))
-    print(evel_hand(players[1].cards + table))
+    print(evaluate_hand(players[0].cards + table))
+    print(evaluate_hand(players[1].cards + table))
 
 
-    res1 = evel_hand(players[0].cards + table)
+    res1 = evaluate_hand(players[0].cards + table)
     res = point_the_winner(players, table)
     for i in range(len(res)):
         print(res[i])

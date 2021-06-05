@@ -1,18 +1,35 @@
 from classes.card import Card
-from view.gamewindow import GameWindow
 
 class Player:
     def __init__(self, tokens, id, name):
-        self.tokens = tokens
+        if tokens <= 0:
+            raise ValueError("Tokens must be greater than 0")
+        self._tokens = tokens
         self.tokens_in_pool = 0
         self.id = id
         self.name = name
         self.cards = []
 
+    @property
+    def tokens(self):
+        return self._tokens
+
+    @tokens.setter
+    def tokens(self, new_tokens):
+        if new_tokens < 0:
+            raise ValueError("Tokens must be positive")
+        else:
+            self._tokens = new_tokens
+
+
     def add_tokens(self, tokens):
+        if tokens <= 0:
+            raise ValueError("Tokens must be positive")
         self.tokens += tokens
 
     def remove_tokens(self, tokens):
+        if tokens > self.tokens:
+            raise ValueError("Can't remove more tokens than you have")
         self.tokens -= tokens
         self.tokens_in_pool += tokens
 
@@ -45,7 +62,7 @@ class Player:
     def fold(self, table):
         table.players_in_round.remove(self)
 
-    def allIn(self,table):
+    def all_in(self, table):
         self.call(table)
         self.raisee(table, self.tokens)
 
