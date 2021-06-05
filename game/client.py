@@ -71,12 +71,12 @@ class Client():
             lock.release()
             # print(wrapped_msg[1])
         elif wrapped_msg[0] == "CARDS":
-            self.game_window.tableCards = wrapped_msg[1]
+            self.game_window.table_cards = wrapped_msg[1]
             # print(wrapped_msg[1])
         elif wrapped_msg[0] == "WINNERS":
             # print("WINNERS:")
             #TODO TUTAJ WYWALA ERROR JAK SIE KOLES ROZLACZY - JAKIS IF POWINIEN ZADZIALAC
-            self.game_window.tableCards = None
+            self.game_window.table_cards = []
             if not self.to_disconnect:
                 self.game_window.update_history(wrapped_msg[1])
             # print(wrapped_msg[1])
