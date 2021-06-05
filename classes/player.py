@@ -1,5 +1,5 @@
 from classes.card import Card
-from view.game_window import game_window
+from view.gamewindow import GameWindow
 
 class Player:
     def __init__(self, tokens, id, name):

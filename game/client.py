@@ -1,14 +1,14 @@
 import socket
 import threading
 import pickle
-from view.game_window import game_window
-from view.game_window import lock
+from view.gamewindow import GameWindow
+from view.gamewindow import lock
 
 HEADER = 64
 PORT = 5051
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.0.52"
+SERVER = "192.168.56.1"
 ADDR = (SERVER, PORT)
 
 
@@ -16,7 +16,7 @@ class Client():
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect(ADDR)
-        self.game_window = game_window(self)
+        self.game_window = GameWindow(self)
         self.connected = True
         self.to_disconnect = False
         self.your_move = False
