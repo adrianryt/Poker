@@ -22,7 +22,7 @@ class Client():
         self.your_move = False
         self.game_end = False
 
-    def send(self,msg):
+    def send(self, msg):
         message = msg.encode(FORMAT)
         msg_length = len(message)
         send_length = str(msg_length).encode(FORMAT)
@@ -31,20 +31,18 @@ class Client():
         self.client.send(message)
         self.your_move = False
 
-    def receve_pickle(self):
+    def receive_pickle(self):
         msg_length = self.client.recv(HEADER).decode(FORMAT)
         if msg_length:
             msg_length = int(msg_length)
             msg = self.client.recv(msg_length)
             return pickle.loads(msg)
 
-    def recive(self):
-        wrapped_msg = self.receve_pickle()
+    def receive(self):
+        wrapped_msg = self.receive_pickle()
         print(wrapped_msg[0])
         if wrapped_msg[0] == DISCONNECT_MESSAGE:
             #self.client.send("Leaving message".encode(FORMAT))
-            # przydolby sie usuwac z dicta rozlaczonego gracza
-            print("NAURA")
             self.client.close()
             self.connected = False
         elif wrapped_msg[0] == "YOUR PLAYER":
@@ -58,7 +56,6 @@ class Client():
             else:
                 self.game_window.enable_buttons()
 
-        #lock dla opponentów - chyba działa ale nie mam jak sprawdzić
         elif wrapped_msg[0] == "OPPONENT": #dostajemy info o jednym oponencie
             lock.acquire()
             self.game_window.update_opponent(wrapped_msg[1])
@@ -72,14 +69,11 @@ class Client():
             # print(wrapped_msg[1])
         elif wrapped_msg[0] == "CARDS":
             self.game_window.table_cards = wrapped_msg[1]
-            # print(wrapped_msg[1])
         elif wrapped_msg[0] == "WINNERS":
-            # print("WINNERS:")
             #TODO TUTAJ WYWALA ERROR JAK SIE KOLES ROZLACZY - JAKIS IF POWINIEN ZADZIALAC
             self.game_window.table_cards = []
             if not self.to_disconnect:
                 self.game_window.update_history(wrapped_msg[1])
-            # print(wrapped_msg[1])
         elif wrapped_msg[0] == "GAME INFO":
             lock.acquire()
             self.game_window.game_info = wrapped_msg[1]
@@ -101,8 +95,7 @@ class Client():
 
     def listening(self):
         while self.connected:
-            self.recive()
-        print("JA JUŻ NIE SLUCHAM")
+            self.receive()
 
 if __name__ == "__main__":
     client = Client()

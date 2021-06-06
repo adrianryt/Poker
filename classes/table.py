@@ -11,7 +11,7 @@ class Table:
         self.deck = Deck()
         self.players: List[Player] = []
         self.pool = 0
-        self.tableCards: List[Card] = []
+        self.table_cards: List[Card] = []
         self.players_in_round: List[Player] = []
         self.players_lost: List[Player] = []
         self.game_info: GameInfo = game_info
@@ -78,7 +78,7 @@ class Table:
                     current_pool += p.tokens_in_pool
                     p.tokens_in_pool = 0
                 print(p, current_pool)
-            winners += point_the_winner(self.players_in_round, self.tableCards)
+            winners += point_the_winner(self.players_in_round, self.table_cards)
             print(winners)
             self.give_prize_tw(winners, current_pool)
             self.players_in_round = [p for p in self.players_in_round if p.tokens_in_pool > 0]
@@ -100,13 +100,13 @@ class Table:
             player.tokens_in_pool = 0
 
     def deal_flop(self):
-        self.tableCards.extend(self.deck.pop_cards(3))
+        self.table_cards.extend(self.deck.pop_cards(3))
 
     def deal_turn_river(self):
-        self.tableCards.append(self.deck.pop_card())
+        self.table_cards.append(self.deck.pop_card())
 
     def remove_cards_table(self):
-        self.tableCards.clear()
+        self.table_cards.clear()
 
     def move_dealer(self):
         tmp = self.players.pop(0)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     print(p2)
     print(p3)
     table.deal_flop()
-    print(table.tableCards)
+    print(table.table_cards)
     table.give_prize_tw([p1,p2])
     print(p1)
     print(p2)
