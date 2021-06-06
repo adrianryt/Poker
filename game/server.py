@@ -213,11 +213,8 @@ def engine():
         send_client_data(game_table.players)
         if (len(game_table.players) <= 1):
             # TODO TUTAJ JAK ZOSTANIE JEDNA OSOBA TO TRZEBA JA ROZLACZYC
-            for p in game_table.players:
-                wrapped_msg = wrap_message("GAME ENDED", None)
-                send_pickle(p, wrapped_msg)
-                conn = conn_dict.pop(p.id)
-                conn.close()
+            players_to_remove += game_table.players
+            update_game_players()
             break
         print("NEW ROUND")
         game_table.update_players_in_round()
@@ -263,21 +260,12 @@ def engine():
             make_round()
 
         send_players_last_round(game_table.players, game_table.players_in_round)
-        time.sleep(5)
+        time.sleep(10)
         winners = game_table.reveal_winners()
-        # print(winners, "DDDDDDD")
         send_who_won(game_table.players, winners)
-        # TODO delete this
-        time.sleep(4)
         # tu nam zwraca liste graczy ktorzy przegrali, tj maja 0 zetonow
         players_to_dc = game_table.new_round()
-        print(game_table.players, "PLAYERS")
-        ##TODO stworzyc z tego funkcje
-        for p in players_to_dc:
-            wrapped_msg = wrap_message("GAME ENDED", None)
-            send_pickle(p, wrapped_msg)
-            conn = conn_dict.pop(p.id)
-            conn.close()
+        players_to_remove += players_to_dc
         update_game_players()
 
 

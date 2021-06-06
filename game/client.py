@@ -43,6 +43,7 @@ class Client():
         print(wrapped_msg[0])
         if wrapped_msg[0] == DISCONNECT_MESSAGE:
             #self.client.send("Leaving message".encode(FORMAT))
+            self.game_end = True
             self.client.close()
             self.connected = False
         elif wrapped_msg[0] == "YOUR PLAYER":
