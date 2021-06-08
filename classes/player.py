@@ -73,7 +73,6 @@ class Player:
         return "(Name: {0}, Id: {1}, Tokens: {2}, Cards: {3} {4})".format(self.name, self.id, self.tokens,
                                                                            self.get_cards()[0], self.get_cards()[1])
 
-
 if __name__ == "__main__":
     player1 = Player(1000, 1, "lololo")
     player1.add_cards([Card(5, 2)])

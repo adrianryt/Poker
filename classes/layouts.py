@@ -24,8 +24,6 @@ def straight_A_5(hand):
 
     return False
 
-
-
 def evaluate_hand(hand):  #7-cards
     NO_PAIR = 0
     PAIR = 1
@@ -36,7 +34,6 @@ def evaluate_hand(hand):  #7-cards
     FULL_HOUSE = 6
     QUADS = 7
     STRAIGHT_FLUSH = 8
-
     sorted_cards = sorted([cards for cards in hand], key=lambda cards: cards.get_suit(), reverse=True)
     sorted_cards = sorted([cards for cards in sorted_cards], key=lambda cards: cards.get_rank(), reverse=True)
     values = sorted([c.get_rank() for c in hand], reverse=True)
@@ -79,8 +76,6 @@ def evaluate_hand(hand):  #7-cards
             quads_counter = 1
             res_cards = [sorted_cards[i]]
 
-
-
     pairs = []
     three_same_valued_cards = False
     value_of_three = None
@@ -110,8 +105,6 @@ def evaluate_hand(hand):  #7-cards
         suits[c.get_suit()].append(c)
         if len(suits[c.get_suit()]) == 5:
             return FLUSH, suits[c.get_suit()]
-
-
 
     # looking for straight
     straight_counter = 1
@@ -176,7 +169,6 @@ def get_biggest_rank(players_hands, n):
             res = hand[n].get_rank()
     return res
 
-
 def solve_draw(players, players_hands):
     winning_players = players.copy()
     winning_hands = players_hands.copy()
@@ -188,7 +180,6 @@ def solve_draw(players, players_hands):
                 players.remove(player)
         winning_hands = players_hands.copy()
         winning_players = players.copy()
-
     return winning_players
 
 def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy sie poprzez player.cards oraz player.get_cards,
@@ -201,9 +192,7 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
         tmp = evaluate_hand(table_cards + players[j].cards)
         players_hands.append(tmp[1])
         players_hand_value.append(tmp[0])
-
     maks_value = max(players_hand_value)
-
 
     if players_hand_value.count(maks_value) == 1:
         return [players[players_hand_value.index(maks_value)]]
@@ -220,19 +209,14 @@ def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy
             players_same_weight.append(players[i])
             players_hands_same_weight.append(players_hands[i])
 
-
         return solve_draw(players_same_weight, players_hands_same_weight)
 
-
-
 if __name__ == "__main__":
-
     card1 = Card(14, 1)
     card2 = Card(2, 1)
     card3 = Card(3, 1)
     card4 = Card(9, 1)
     card5 = Card(2, 2)
-
 
     card6 = Card(4, 1)
     card7 = Card(5, 1)
@@ -252,7 +236,6 @@ if __name__ == "__main__":
     table.append(card5)
     print(evaluate_hand(players[0].cards + table))
     print(evaluate_hand(players[1].cards + table))
-
 
     res1 = evaluate_hand(players[0].cards + table)
     res = point_the_winner(players, table)

@@ -134,7 +134,7 @@ class GameWindow:
                                  (self.calculate_position_for_opponent(angle * i, self.TABLE_RADIUS + 70)))
                 self.window.blit((tokens_pool_surface),
                                  (self.calculate_position_for_opponent(angle * i, self.TABLE_RADIUS - 40)))
-                
+
                 if hasattr(val, "cards"):
                     self.draw_card(X - 70,Y - 170,self.cardDict.get(val.cards[0].get_card_in_int()))
                     self.draw_card(X, Y - 170, self.cardDict.get(val.cards[1].get_card_in_int()))

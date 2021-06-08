@@ -12,7 +12,6 @@ class LimitedPlayer:
     def __str__(self):
         return "(Name: {0}, Id: {1}, Tokens: {2})".format(self.name, self.id, self.tokens)
 
-
 if __name__ == "__main__":
     player1 = Player(1000, 1, "lololo")
     player2 = LimitedPlayer(player1)

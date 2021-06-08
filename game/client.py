@@ -40,15 +40,12 @@ class Client():
 
     def receive(self):
         wrapped_msg = self.receive_pickle()
-        print(wrapped_msg[0])
         if wrapped_msg[0] == DISCONNECT_MESSAGE:
-            #self.client.send("Leaving message".encode(FORMAT))
             self.game_end = True
             self.client.close()
             self.connected = False
         elif wrapped_msg[0] == "YOUR PLAYER":
             self.game_window.player = wrapped_msg[1]
-            print(wrapped_msg[1])
         elif wrapped_msg[0] == "CHOOSE MOVE":
             self.your_move = True
             print("Co robisz?")
@@ -61,17 +58,14 @@ class Client():
             lock.acquire()
             self.game_window.update_opponent(wrapped_msg[1])
             lock.release()
-            # print(wrapped_msg[1])
         elif wrapped_msg[0] == "OPPONENTS":  # dostajemy info o wszystkich oponentach
             lock.acquire()
             self.game_window.opponents = wrapped_msg[1]
             dict(sorted(self.game_window.opponents.items(), key=lambda item: item[1].id))
             lock.release()
-            # print(wrapped_msg[1])
         elif wrapped_msg[0] == "CARDS":
             self.game_window.table_cards = wrapped_msg[1]
         elif wrapped_msg[0] == "WINNERS":
-            #TODO TUTAJ WYWALA ERROR JAK SIE KOLES ROZLACZY - JAKIS IF POWINIEN ZADZIALAC
             self.game_window.table_cards = []
             if not self.to_disconnect:
                 self.game_window.stat_window.update_history(self.game_window.player,wrapped_msg[1])
@@ -84,7 +78,6 @@ class Client():
             self.game_window.pool = wrapped_msg[1]
             lock.release()
         elif wrapped_msg[0] == "GAME ENDED":
-            print(self.game_window.player)
             self.game_end = True
             self.client.close()
             self.connected = False
