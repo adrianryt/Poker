@@ -1,10 +1,8 @@
 import pygame
 import os
-from pygame_widgets import Button
 import math
 from pygame_widgets import Slider, TextBox
 import threading
-import time
 from view.button import ActionButton
 
 lock = threading.Lock()
@@ -12,7 +10,7 @@ lock = threading.Lock()
 
 class GameWindow:
     pygame.init()
-    cardDict = {None: 'red_joker.png', 8: '2_of_spades.png', 9: '2_of_clubs.png', 10: '2_of_diamonds.png',
+    cardDict = {0: 'card_back.png', 8: '2_of_spades.png', 9: '2_of_clubs.png', 10: '2_of_diamonds.png',
                 11: '2_of_hearts.png',
                 12: '3_of_spades.png', 13: '3_of_clubs.png', 14: '3_of_diamonds.png', 15: '3_of_hearts.png',
                 16: '4_of_spades.png', 17: '4_of_clubs.png', 18: '4_of_diamonds.png', 19: '4_of_hearts.png',
@@ -101,8 +99,13 @@ class GameWindow:
             y = t_y + radius * math.cos(math.radians(alpha))
         return x, y
 
-    def draw_window(self):
+    def draw_card(self,X,Y,card_in_int):
+        card1 = pygame.image.load(
+            os.path.join('../Assets/cards', card_in_int))
+        card1 = self.transform_img(card1, 70, 105)
+        self.window.blit(card1, (X, Y))
 
+    def draw_window(self):
         self.window.fill(self.BACKGROUND)
         pygame.draw.circle(self.window, (0, 255, 0), (self.WIDTH / 3, self.HEIGHT / 2 + self.Y_CONF), self.TABLE_RADIUS)
         # player_drawing
@@ -115,14 +118,8 @@ class GameWindow:
                 self.slider.__setattr__("max",
                                         self.player.tokens - (self.game_info.biggest_bet - self.player.tokens_in_pool))
 
-            card1 = pygame.image.load(
-                os.path.join('../Assets/cards', self.cardDict.get(self.player.cards[0].get_card_in_int())))
-            card1 = self.transform_img(card1, 70, 105)
-            self.window.blit(card1, (self.WIDTH / 3 - 70, self.HEIGHT - 240 + self.Y_CONF))
-            card2 = pygame.image.load(
-                os.path.join('../Assets/cards', self.cardDict.get(self.player.cards[1].get_card_in_int())))
-            card2 = self.transform_img(card2, 70, 105)
-            self.window.blit(card2, (self.WIDTH / 3, self.HEIGHT - 240 + self.Y_CONF))
+            self.draw_card(self.WIDTH / 3 - 70,self.HEIGHT - 240 + self.Y_CONF,self.cardDict.get(self.player.cards[0].get_card_in_int()) )
+            self.draw_card(self.WIDTH / 3,self.HEIGHT - 240 + self.Y_CONF,self.cardDict.get(self.player.cards[1].get_card_in_int()) )
             tokens_surface = self.CLIENT_FONT.render(str(self.player.tokens), True, (0, 0, 0))
             self.window.blit(tokens_surface, (620, 650))
             tokens_pool_surface = self.OPPONENTS_FONT.render(str(self.player.tokens_in_pool), True, (0, 0, 0))
@@ -131,9 +128,6 @@ class GameWindow:
         if len(self.opponents) != 0:
             no_opponents = len(self.opponents)
             angle = 360 / (no_opponents + 1)
-            # TODO przydaloby sie chyba innej struktury uzyc, bo ciagle sortowanie nie ma sensu, chyba ze wystarczy raz na samym poczatku dunno
-            # tu było sortowanie ale już nie ma jakby się coś jebało z kolejnością to trzeba tu dać to sortowanie
-
             lock.acquire()
             i = 1
             for key, val in self.opponents.items():
@@ -153,45 +147,32 @@ class GameWindow:
                 card1 = None
                 card2 = None
                 if hasattr(val, "cards"):
-                    card1 = pygame.image.load(
-                        os.path.join('../Assets/cards', self.cardDict.get(val.cards[0].get_card_in_int())))
-                    card2 = pygame.image.load(
-                        os.path.join('../Assets/cards', self.cardDict.get(val.cards[1].get_card_in_int())))
+                    self.draw_card(X - 70,Y - 170,self.cardDict.get(val.cards[0].get_card_in_int()))
+                    self.draw_card(X, Y - 170, self.cardDict.get(val.cards[1].get_card_in_int()))
                 else:
-                    card1 = pygame.image.load(os.path.join('../Assets/cards', 'card_back.png'))
-                    card2 = pygame.image.load(os.path.join('../Assets/cards', 'card_back.png'))
-
-                card1 = self.transform_img(card1, 70, 105)
-                self.window.blit(card1, (X - 70, Y - 170))
-                card2 = self.transform_img(card2, 70, 105)
-                self.window.blit(card2, (X, Y - 170))
+                    self.draw_card(X - 70, Y - 170, self.cardDict.get(0))
+                    self.draw_card(X, Y - 170, self.cardDict.get(0))
                 # end_oponennt cards
                 i += 1
             lock.release()
-
         # table_cards_drawing
         lock.acquire()
         x_offset = 0
         for card in self.table_cards:
-            card = pygame.image.load(os.path.join('../Assets/cards', self.cardDict.get(card.get_card_in_int())))
-            card = self.transform_img(card, 70, 105)
-            self.window.blit(card, (self.WIDTH / 3 - 175 + x_offset, self.HEIGHT / 2))
+            # card = pygame.image.load(os.path.join('../Assets/cards', self.cardDict.get(card.get_card_in_int())))
+            # card = self.transform_img(card, 70, 105)
+            # self.window.blit(card, (self.WIDTH / 3 - 175 + x_offset, self.HEIGHT / 2))
+            self.draw_card(self.WIDTH / 3 - 175 + x_offset, self.HEIGHT / 2,self.cardDict.get(card.get_card_in_int()))
             x_offset += 70
-        lock.release()
-        # mozliwe ze te locki sa tu nie potrzebne
-        lock.acquire()
         pool_surface = self.CLIENT_FONT.render(str(self.pool), True, (0, 0, 0))
         lock.release()
-
         self.window.blit(pool_surface, (0, 0))
-
         pygame.draw.rect(self.window, self.BLACK, self.BORDER)
 
     def enable_buttons(self):
         # te przyciski zawze mozna wcisnac
         self.fold_btn.enable_btn()
         self.all_in_btn.enable_btn()
-
         lock.acquire()
         max_bet = self.game_info.biggest_bet
         lock.release()
@@ -211,7 +192,6 @@ class GameWindow:
         self.raise_btn.disable_btn()
 
     def update_history(self, winners):
-        # winners to limited players dlatego sprawdzam po id
         curr_tokens = None
         for idx, winner in enumerate(winners):
             if winner.id == self.player.id:
@@ -222,9 +202,6 @@ class GameWindow:
         else:
             tmp = "lose - " + str(self.player.tokens_in_pool)
         self.history_surface.append(self.HISTORY_FONT.render(tmp, True, self.BLACK))
-        # na stacku piszą że surface dla textu nie obsługuje nowych lini
-        # więc trzeba zrobić tablice stringów i je wypisywać jeden pod drugim
-        # https://stackoverflow.com/questions/32590131/pygame-blitting-text-with-an-escape-character-or-newline
 
     def draw_history(self):
         X = self.WIDTH / 3 * 2 + 20
@@ -235,10 +212,27 @@ class GameWindow:
         for line in range(N):  # v - fontsize
             self.window.blit(self.history_surface[line], (X, Y + (line * 24) + (15 * line)))
 
+    def draw_buttons(self, events):
+        self.call_btn.listen(events)
+        self.call_btn.draw()
+        self.fold_btn.listen(events)
+        self.fold_btn.draw()
+        self.check_btn.listen(events)
+        self.check_btn.draw()
+        self.all_in_btn.listen(events)
+        self.all_in_btn.draw()
+        self.raise_btn.listen(events)
+        self.raise_btn.draw()
+        self.slider.listen(events)
+        self.slider.draw()
+        self.raise_text_box.setText(self.slider.getValue())
+        self.raise_text_box.draw()
+        if self.raise_btn.enable:
+            self.raise_btn.setOnClick(self.raise_btn.action, [self.slider.getValue()])
+
     def end(self):
         self.window.fill(self.BACKGROUND)
-        player_tokens_surface = self.OPPONENTS_FONT.render("You have: " + str(self.player.tokens) + "tokens", True,
-                                                           self.BLACK)
+        player_tokens_surface = self.OPPONENTS_FONT.render("You have: " + str(self.player.tokens) + "tokens",True,self.BLACK)
         self.window.blit(player_tokens_surface, (self.WIDTH / 3, self.HEIGHT/2 - 16))
 
     def main(self):
@@ -261,23 +255,7 @@ class GameWindow:
             else:
                 self.draw_window()
                 self.draw_history()
-                self.call_btn.listen(events)
-                self.call_btn.draw()
-                self.fold_btn.listen(events)
-                self.fold_btn.draw()
-                self.check_btn.listen(events)
-                self.check_btn.draw()
-                self.all_in_btn.listen(events)
-                self.all_in_btn.draw()
-                self.raise_btn.listen(events)
-                self.raise_btn.draw()
-                self.slider.listen(events)
-                self.slider.draw()
-
-                self.raise_text_box.setText(self.slider.getValue())
-                self.raise_text_box.draw()
-                if self.raise_btn.enable:
-                    self.raise_btn.setOnClick(self.raise_btn.action, [self.slider.getValue()])
+                self.draw_buttons(events)
             pygame.display.update()
 
     # widok logowania
@@ -340,7 +318,6 @@ class GameWindow:
             if len(self.opponents) != 0:
                 return
             pygame.display.update()
-
 
 if __name__ == "__main__":
     game_window = GameWindow(None)
