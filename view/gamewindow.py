@@ -4,6 +4,7 @@ import math
 from pygame_widgets import Slider, TextBox
 import threading
 from view.button import ActionButton
+from view.statswindow import StatsWindow
 
 lock = threading.Lock()
 
@@ -26,7 +27,6 @@ class GameWindow:
                 52: 'king_of_spades.png', 53: 'king_of_clubs.png', 54: 'king_of_diamonds.png', 55: 'king_of_hearts.png',
                 56: 'ace_of_spades.png', 57: 'ace_of_clubs.png', 58: 'ace_of_diamonds.png', 59: 'ace_of_hearts.png',
                 }
-
     WIDTH = 1200
     HEIGHT = 800
     FPS = 60
@@ -37,20 +37,16 @@ class GameWindow:
     TABLE_RADIUS = 250
     Y_CONF = 80
     BORDER = pygame.Rect(WIDTH / 3 * 2, 0, 2, HEIGHT)
-
     CLIENT_FONT = pygame.font.Font(None, 50)
     OPPONENTS_FONT = pygame.font.Font(None, 32)
-    HISTORY_FONT = pygame.font.Font(None, 24)
 
     def __init__(self, client):
         self.client = client
-
         self.player = None
         self.opponents = {}
         self.table_cards = []
         self.game_info = None
         self.pool = 0
-
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         # wszystkie przyciski
         self.call_btn = ActionButton(self.window, 100, 665 + self.Y_CONF, 'Call', self)
@@ -58,11 +54,9 @@ class GameWindow:
         self.check_btn = ActionButton(self.window, 300, 665 + self.Y_CONF, 'Check', self)
         self.all_in_btn = ActionButton(self.window, 200, 665 + self.Y_CONF, 'AllIn', self)
         self.raise_btn = ActionButton(self.window, 500, 665 + self.Y_CONF, "Raise", self)
-
         self.slider = Slider(self.window, 600, 600 + self.Y_CONF, 150, 30, min=0, max=99, step=10)
-        # wyświetla wartośc o jaką chcemy przebic, aktualizuje się podczas ruchu slidera
         self.raise_text_box = TextBox(self.window, 600, 665 + self.Y_CONF, 100, 50, fontSize=30)
-        self.history_surface = [self.HISTORY_FONT.render("Your game stat: ", True, self.BLACK)]
+        self.stat_window = StatsWindow()
 
         pygame.display.set_caption("PokerGame!")
 
@@ -117,14 +111,13 @@ class GameWindow:
             else:
                 self.slider.__setattr__("max",
                                         self.player.tokens - (self.game_info.biggest_bet - self.player.tokens_in_pool))
-
             self.draw_card(self.WIDTH / 3 - 70,self.HEIGHT - 240 + self.Y_CONF,self.cardDict.get(self.player.cards[0].get_card_in_int()) )
             self.draw_card(self.WIDTH / 3,self.HEIGHT - 240 + self.Y_CONF,self.cardDict.get(self.player.cards[1].get_card_in_int()) )
             tokens_surface = self.CLIENT_FONT.render(str(self.player.tokens), True, (0, 0, 0))
             self.window.blit(tokens_surface, (620, 650))
             tokens_pool_surface = self.OPPONENTS_FONT.render(str(self.player.tokens_in_pool), True, (0, 0, 0))
             self.window.blit(tokens_pool_surface, (self.WIDTH / 3, self.HEIGHT - 275 + self.Y_CONF))
-
+        #start_oponnents_drawing
         if len(self.opponents) != 0:
             no_opponents = len(self.opponents)
             angle = 360 / (no_opponents + 1)
@@ -133,7 +126,6 @@ class GameWindow:
             for key, val in self.opponents.items():
                 X, Y = self.calculate_position_for_opponent(angle * i, self.TABLE_RADIUS + 30)
                 pygame.draw.circle(self.window, (128, 119, 119), (X, Y), 50)
-                # oponent_circle + tokens
                 id_surface = self.OPPONENTS_FONT.render(str(val.name), True, self.BLACK)
                 tokens_surface = self.OPPONENTS_FONT.render(str(val.tokens), True, self.BLACK)
                 tokens_pool_surface = self.OPPONENTS_FONT.render(str(val.tokens_in_pool), True, self.BLACK)
@@ -142,26 +134,20 @@ class GameWindow:
                                  (self.calculate_position_for_opponent(angle * i, self.TABLE_RADIUS + 70)))
                 self.window.blit((tokens_pool_surface),
                                  (self.calculate_position_for_opponent(angle * i, self.TABLE_RADIUS - 40)))
-                # end of oponent_circle + tokens
-                # start_oponnent cards
-                card1 = None
-                card2 = None
+                
                 if hasattr(val, "cards"):
                     self.draw_card(X - 70,Y - 170,self.cardDict.get(val.cards[0].get_card_in_int()))
                     self.draw_card(X, Y - 170, self.cardDict.get(val.cards[1].get_card_in_int()))
                 else:
                     self.draw_card(X - 70, Y - 170, self.cardDict.get(0))
                     self.draw_card(X, Y - 170, self.cardDict.get(0))
-                # end_oponennt cards
                 i += 1
             lock.release()
+            #end_oponnents_drawing
         # table_cards_drawing
         lock.acquire()
         x_offset = 0
         for card in self.table_cards:
-            # card = pygame.image.load(os.path.join('../Assets/cards', self.cardDict.get(card.get_card_in_int())))
-            # card = self.transform_img(card, 70, 105)
-            # self.window.blit(card, (self.WIDTH / 3 - 175 + x_offset, self.HEIGHT / 2))
             self.draw_card(self.WIDTH / 3 - 175 + x_offset, self.HEIGHT / 2,self.cardDict.get(card.get_card_in_int()))
             x_offset += 70
         pool_surface = self.CLIENT_FONT.render(str(self.pool), True, (0, 0, 0))
@@ -191,27 +177,6 @@ class GameWindow:
         self.all_in_btn.disable_btn()
         self.raise_btn.disable_btn()
 
-    def update_history(self, winners):
-        curr_tokens = None
-        for idx, winner in enumerate(winners):
-            if winner.id == self.player.id:
-                curr_tokens = winner.tokens
-
-        if curr_tokens != None:
-            tmp = "win - " + str(curr_tokens - (self.player.tokens_in_pool + self.player.tokens))
-        else:
-            tmp = "lose - " + str(self.player.tokens_in_pool)
-        self.history_surface.append(self.HISTORY_FONT.render(tmp, True, self.BLACK))
-
-    def draw_history(self):
-        X = self.WIDTH / 3 * 2 + 20
-        Y = 20
-        N = len(self.history_surface)
-        if Y + (N * 24) + (15 * N) >= self.HEIGHT:
-            self.history_surface.pop(1)
-        for line in range(N):  # v - fontsize
-            self.window.blit(self.history_surface[line], (X, Y + (line * 24) + (15 * line)))
-
     def draw_buttons(self, events):
         self.call_btn.listen(events)
         self.call_btn.draw()
@@ -229,11 +194,6 @@ class GameWindow:
         self.raise_text_box.draw()
         if self.raise_btn.enable:
             self.raise_btn.setOnClick(self.raise_btn.action, [self.slider.getValue()])
-
-    def end(self):
-        self.window.fill(self.BACKGROUND)
-        player_tokens_surface = self.OPPONENTS_FONT.render("You have: " + str(self.player.tokens) + "tokens",True,self.BLACK)
-        self.window.blit(player_tokens_surface, (self.WIDTH / 3, self.HEIGHT/2 - 16))
 
     def main(self):
         run = True
@@ -254,9 +214,14 @@ class GameWindow:
                 self.end()
             else:
                 self.draw_window()
-                self.draw_history()
+                self.stat_window.draw_history(self.window)
                 self.draw_buttons(events)
             pygame.display.update()
+
+    def end(self):
+        self.window.fill(self.BACKGROUND)
+        player_tokens_surface = self.OPPONENTS_FONT.render("You have: " + str(self.player.tokens) + "tokens",True,self.BLACK)
+        self.window.blit(player_tokens_surface, (self.WIDTH / 3, self.HEIGHT/2 - 16))
 
     # widok logowania
     def login(self):
@@ -288,10 +253,8 @@ class GameWindow:
             pygame.draw.rect(self.window, self.WHITE, nick_input)
             nick_surface = base_font.render(nick, True, self.BLACK)
             self.window.blit(nick_surface, (nick_input.x, nick_input.y + 5))
-
             msg_surface = base_font.render(msg, True, self.BLACK)
             self.window.blit(msg_surface, (nick_input.x, nick_input.y - height))
-
             pygame.display.update()
 
     # wykonuje sie w nieskonczonosc, az do momentu przyslania przez serwer dicta z przeciwnikami.
