@@ -1,6 +1,4 @@
 from classes.deck import Deck
-from classes.player import Player
-from classes.card import Card
 from classes.game_info import GameInfo
 from classes.layouts import *
 from typing import List
@@ -9,11 +7,11 @@ import math
 class Table:
     def __init__(self, game_info):
         self.deck = Deck()
-        self.players: List[Player] = []
+        self.players = []
         self.pool = 0
-        self.table_cards: List[Card] = []
-        self.players_in_round: List[Player] = []
-        self.players_lost: List[Player] = []
+        self.table_cards = []
+        self.players_in_round = []
+        self.players_lost = []
         self.game_info: GameInfo = game_info
 
 
@@ -34,17 +32,12 @@ class Table:
 
     def remove_players(self):
         players_to_disconnect = []
-        #print(self.players, "CO JEST")
         for p in self.players:
-            #print(p, p.tokens, "USUWANIE GRACZY ZE STOLU")
             if p.tokens == 0:
-                #print(p, "ELO")
                 players_to_disconnect.append(p)
         for p in players_to_disconnect:
             self.remove_player(p)
         return players_to_disconnect
-
-
 
     #every new round
     def update_players_in_round(self):
@@ -64,7 +57,6 @@ class Table:
             winner.add_tokens(tokens_to_add)
         self.pool -= curr_pool
 
-
     def reveal_winners(self):
         winners = []
         while self.pool > 0:
@@ -77,23 +69,16 @@ class Table:
                 else:
                     current_pool += p.tokens_in_pool
                     p.tokens_in_pool = 0
-                #print(p, current_pool)
             winners += point_the_winner(self.players_in_round, self.table_cards)
-            #print(winners)
             self.give_prize_tw(winners, current_pool)
             self.players_in_round = [p for p in self.players_in_round if p.tokens_in_pool > 0]
-            #print(self.players_in_round)
-            #print(self.pool)
         return winners
-
-
 
     def deal_cards_players(self):
         for player in self.players:
             cards = self.deck.pop_cards(2)
             player.add_cards(cards)
 
-    #przy usuwaniu kart trzeba wyzerowac tokens_in_pool
     def remove_cards_players(self):
         for player in self.players:
             player.remove_cards()
@@ -120,10 +105,6 @@ class Table:
         players_to_disconnect = self.remove_players()
         self.move_dealer()
         return players_to_disconnect
-
-
-
-
 
 if __name__ == "__main__":
     table = Table()

@@ -1,7 +1,6 @@
 import random
 from classes.card import Card
 
-
 class Deck:
     def __init__(self):
         self.deck = [Card(rank, suit) for rank in range(2, 15) for suit in range(0, 4)]
@@ -26,8 +25,6 @@ class Deck:
         self.deck.extend(self.popped_cards)
         self.popped_cards.clear()
         self.shuffle()
-
-
 
 if __name__ == "__main__":
     deck = Deck()

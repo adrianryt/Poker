@@ -21,7 +21,6 @@ class Player:
         else:
             self._tokens = new_tokens
 
-
     def add_tokens(self, tokens):
         if tokens <= 0:
             raise ValueError("Tokens must be positive")

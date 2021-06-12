@@ -18,6 +18,7 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
+#podanie danych o rozgrywce
 game_info = GameInfo(10, 30)
 game_table = Table(game_info)
 conn_dict = {}
@@ -34,7 +35,7 @@ def recive(conn):
             idx = None
             p = None
             for key, val in conn_dict.items():
-                if (val == conn):
+                if val == conn:
                     idx = key
             for player in game_table.players:
                 if player.id == idx:
@@ -44,6 +45,7 @@ def recive(conn):
         else:
             return msg
 
+
 def send(msg_to, msg):
     message = msg.encode(FORMAT)
     msg_length = len(message)
@@ -51,6 +53,7 @@ def send(msg_to, msg):
     send_length += b' ' * (HEADER - len(send_length))
     msg_to.send(send_length)
     msg_to.send(message)
+
 
 def start():
     print(f"[LISTENING] Server is listening on {SERVER}")
@@ -70,14 +73,17 @@ def start():
         if len(conn_dict) == LIMIT:
             return
 
+
 def wrap_message(type, msg):  # string oraz coś co chcemy do message włożyć
     result = (type, msg)
     return result
+
 
 def send_pickle(player, msg):  # (do kogo, co)
     msg_to_client = pickle.dumps(msg)
     msg_to_client = bytes(f'{len(msg_to_client):<{HEADER}}', "utf-8") + msg_to_client
     conn_dict[player.id].send(msg_to_client)
+
 
 # wysłanie do graczy jakie karty pojawiły się na stole
 def send_table_cards(players):
@@ -85,11 +91,13 @@ def send_table_cards(players):
         wrapped_msg = wrap_message("CARDS", game_table.table_cards)
         send_pickle(p, wrapped_msg)
 
+
 # wysłanie każdemu graczowi informacji o sobie samym
 def send_client_data(players):
     for p in players:
         wrapped_msg = wrap_message("YOUR PLAYER", p)
         send_pickle(p, wrapped_msg)
+
 
 # wysłanie informacji o danym graczu do przeciwników, wysyłany jest LimitedPlayer
 def send_data_to_opponents(players, client):
@@ -99,11 +107,13 @@ def send_data_to_opponents(players, client):
     for opponent in opponents:
         send_pickle(opponent, wrapped_msg)
 
+
 def send_who_won(players, winners):
     limited_winners = [LimitedPlayer(winner) for winner in winners]
     for p in players:
         wrapped_msg = wrap_message("WINNERS", limited_winners)
         send_pickle(p, wrapped_msg)
+
 
 # wysłanie wszystkim graczom informacji o przeciwnikach, wysyłane jest LimitedPlayer
 def send_opponents_data(players):
@@ -114,6 +124,7 @@ def send_opponents_data(players):
         send_pickle(player, wrapped_msg)
         limited_players_dict[player.id] = LimitedPlayer(player)
 
+
 # po ostatniej rundzie wysyłamy do każdego gracza który jest przy stole, PELNE informacje o graczach ktorzy dotrwali to ostatniej rundy
 def send_players_last_round(all_players, active_players):
     if len(active_players) > 1:
@@ -123,6 +134,7 @@ def send_players_last_round(all_players, active_players):
                     wrapped_msg = wrap_message("OPPONENT", p_a)
                     send_pickle(all_p, wrapped_msg)
 
+
 def send_game_info(all_players, info, tokens_pool):
     game_info = wrap_message("GAME INFO", info)
     pool = wrap_message("POOL", tokens_pool)
@@ -130,7 +142,8 @@ def send_game_info(all_players, info, tokens_pool):
         send_pickle(p, game_info)
         send_pickle(p, pool)
 
-def round_action(p):
+
+def round_action(p): #p - player
     wrapped_msg = wrap_message("CHOOSE MOVE", p)
     send_pickle(p, wrapped_msg)
     # on tutaj czeka na odpowiedz - czyli na klikniecie buttona
@@ -152,6 +165,7 @@ def round_action(p):
     send_client_data([p])  # po to zeby klient mial pewnosc co zrobil, znikna mu wtedy zetony np.
     send_data_to_opponents(game_table.players, p)
 
+
 def make_round():
     players_number = len(game_table.players)
     for idx, p in enumerate(itertools.cycle(game_table.players), 1):
@@ -161,6 +175,7 @@ def make_round():
         if all(p.tokens_in_pool == game_table.get_biggest_bet() or p.tokens == 0 for p in
                game_table.players_in_round) and idx >= players_number:
             break
+
 
 def update_game_players():
     global players_to_remove
@@ -173,13 +188,14 @@ def update_game_players():
         conn.close()
     players_to_remove = []
 
+
 def engine():
     global players_to_remove
     global conn_dict
     send_game_info(game_table.players, game_table.game_info, game_table.pool)
     while True:
         send_client_data(game_table.players)
-        if (len(game_table.players) <= 1):
+        if len(game_table.players) <= 1:
             players_to_remove += game_table.players
             update_game_players()
             break
@@ -193,7 +209,7 @@ def engine():
         send_client_data(game_table.players)
         send_opponents_data(game_table.players)
         send_game_info(game_table.players, game_table.game_info, game_table.pool)
-        # te petle to te rozdania
+
         if len(game_table.players_in_round) > 1:
             players_number = len(game_table.players)
             for idx, p in enumerate(itertools.cycle(game_table.players), 1):
@@ -230,7 +246,6 @@ def engine():
         players_to_dc = game_table.new_round()
         players_to_remove += players_to_dc
         update_game_players()
-
 
 if __name__ == "__main__":
     print("[STARTING] server is starting...")
