@@ -63,11 +63,13 @@ class GameWindow:
     def update_opponent(self, limited_player):
         self.opponents[limited_player.id] = limited_player
 
-    def transform_img(self, img, a, b):
+    @staticmethod
+    def transform_img(img, a, b):
         img = pygame.transform.scale(img, (a, b))
         return img
 
-    def wrap_angle(self, n):
+    @staticmethod
+    def wrap_angle(n):
         res = n % 180
         if res > 90:
             return 180 - res
@@ -111,6 +113,7 @@ class GameWindow:
             else:
                 self.slider.__setattr__("max",
                                         self.player.tokens - (self.game_info.biggest_bet - self.player.tokens_in_pool))
+
             self.draw_card(self.WIDTH / 3 - 70,self.HEIGHT - 240 + self.Y_CONF,self.cardDict.get(self.player.cards[0].get_card_in_int()) )
             self.draw_card(self.WIDTH / 3,self.HEIGHT - 240 + self.Y_CONF,self.cardDict.get(self.player.cards[1].get_card_in_int()) )
             tokens_surface = self.CLIENT_FONT.render(str(self.player.tokens), True, (0, 0, 0))
@@ -148,7 +151,7 @@ class GameWindow:
         lock.acquire()
         x_offset = 0
         for card in self.table_cards:
-            self.draw_card(self.WIDTH / 3 - 175 + x_offset, self.HEIGHT / 2,self.cardDict.get(card.get_card_in_int()))
+            self.draw_card(self.WIDTH / 3 - 175 + x_offset, self.HEIGHT / 2, self.cardDict.get(card.get_card_in_int()))
             x_offset += 70
         pool_surface = self.CLIENT_FONT.render(str(self.pool), True, (0, 0, 0))
         lock.release()
@@ -203,7 +206,6 @@ class GameWindow:
             for event in events:
                 if event.type == pygame.QUIT:
                     run = False
-                    # tutaj mamy obsluge rozlaczenia sie z serwerem
                     self.client.to_disconnect = True
                     if self.client.your_move and not self.client.game_end:
                         self.client.disconnect_at_move()
@@ -214,8 +216,8 @@ class GameWindow:
                 self.end()
             else:
                 self.draw_window()
-                self.stat_window.draw_history(self.window)
                 self.draw_buttons(events)
+                self.stat_window.draw_history(self.window)
             pygame.display.update()
 
     def end(self):
@@ -245,7 +247,6 @@ class GameWindow:
                         nick = nick[0:-1]
                     elif event.key == pygame.K_RETURN:
                         if len(nick) != 0:
-                            # zwracam nick jaki wpisał gracz
                             return nick
                     else:
                         nick += event.unicode

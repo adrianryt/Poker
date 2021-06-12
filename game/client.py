@@ -8,9 +8,8 @@ HEADER = 64
 PORT = 5051
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "172.28.16.1"
+SERVER = "192.168.65.183"
 ADDR = (SERVER, PORT)
-
 
 class Client():
     def __init__(self):
@@ -58,7 +57,7 @@ class Client():
             lock.acquire()
             self.game_window.update_opponent(wrapped_msg[1])
             lock.release()
-        elif wrapped_msg[0] == "OPPONENTS":  # dostajemy info o wszystkich oponentach
+        elif wrapped_msg[0] == "OPPONENTS":  #dostajemy informacje o wszystkich oponentach
             lock.acquire()
             self.game_window.opponents = wrapped_msg[1]
             dict(sorted(self.game_window.opponents.items(), key=lambda item: item[1].id))

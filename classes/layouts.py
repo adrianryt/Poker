@@ -1,6 +1,8 @@
 from classes.card import Card
 from classes.player import Player
 
+
+# strit od asa do 5 w kolorze
 def straight_flush_A_5(hand):
     suits = [[] for _ in range(4)]
     for c in hand:
@@ -10,10 +12,11 @@ def straight_flush_A_5(hand):
             return straight_A_5(suited_cards)
     return False
 
+
+# strit od asa do 5
 def straight_A_5(hand):
     ranks = [x.get_rank() for x in hand]
     if 5 in ranks and 4 in ranks and 3 in ranks and 2 in ranks and 14 in ranks:
-
         result = [card for card in hand if card.get_rank() == 5 or card.get_rank() == 4 or card.get_rank() == 3
                   or card.get_rank() == 2 or card.get_rank() == 14]
         result = list({card.get_rank(): card for card in result}.values())
@@ -21,7 +24,6 @@ def straight_A_5(hand):
         ace = result.pop(0)
         result.append(ace)
         return result
-
     return False
 
 def evaluate_hand(hand):  #7-cards
@@ -39,11 +41,10 @@ def evaluate_hand(hand):  #7-cards
     values = sorted([c.get_rank() for c in hand], reverse=True)
 
     #looking for poker
-    poker_counter = 1
     res_cards = []
     suits = [[] for _ in range(4)]
     for i in range(0, len(sorted_cards)):
-        tmp = suits[sorted_cards[i].get_suit()] # tmp - tablica kart o tym samym kolorze
+        tmp = suits[sorted_cards[i].get_suit()] #tmp - tablica kart o tym samym kolorze
         tmp.append(sorted_cards[i])
         if len(tmp) >= 5:
             res_cards = [tmp[0]]
@@ -100,7 +101,7 @@ def evaluate_hand(hand):  #7-cards
         return FULL_HOUSE, res_cards
 
     # looking for flush
-    suits = [[] for i in range(4)]
+    suits = [[] for _ in range(4)]
     for c in sorted_cards:
         suits[c.get_suit()].append(c)
         if len(suits[c.get_suit()]) == 5:
@@ -161,7 +162,6 @@ def evaluate_hand(hand):  #7-cards
 
     return NO_PAIR, [x for x in sorted_cards[0:5]]
 
-
 def get_biggest_rank(players_hands, n):
     res = -1
     for hand in players_hands:
@@ -182,8 +182,7 @@ def solve_draw(players, players_hands):
         winning_players = players.copy()
     return winning_players
 
-def point_the_winner(players, table_cards): #lista graczy(do ich kart odwolujemy sie poprzez player.cards oraz player.get_cards,
-    #oraz table_cards - to już jest gotowa lista 3 kart ktore sa na stole czyli działamy na 2 listach
+def point_the_winner(players, table_cards):
     n = len(players)
     players_hand_value = []
     players_hands = []
