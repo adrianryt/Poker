@@ -26,6 +26,9 @@ When all the players are connected the game stars:
 ![table](https://user-images.githubusercontent.com/72470330/121774104-dd100880-cb80-11eb-862b-81554458c727.png)
 
 
-Adrian Ryt: 
+<b>Adrian Ryt</b><br> 
+The project turned out to be quite time consuming due to many specific rules in Poker. Project taught me that making a good scheme before writing the code is very important and helpful.
+My skills in python has expanded, I learned about client - server conenction, pickles and threads.
+Overall, the project was very fun to write, python is very friendly language and the documentation in great.
 
 Mateusz Pieróg:
