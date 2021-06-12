@@ -18,8 +18,11 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
+TOKENS = 1000
+SMALL_BLIND = 10
+
 #podanie danych o rozgrywce
-game_info = GameInfo(10, 30)
+game_info = GameInfo(SMALL_BLIND, 30)
 game_table = Table(game_info)
 conn_dict = {}
 players_to_remove = []
@@ -65,7 +68,7 @@ def start():
         if msg_length:
             msg_length = int(msg_length)
             nick = conn.recv(msg_length).decode(FORMAT)
-            player = Player(1000, idx, nick)
+            player = Player(TOKENS, idx, nick)
             game_table.add_player(player)
             conn_dict[idx] = conn
         print(f"[ACTIVE CONNECTIONS] {len(conn_dict)}")
@@ -249,6 +252,6 @@ def engine():
 
 if __name__ == "__main__":
     print("[STARTING] server is starting...")
-    LIMIT = int(input("Podaj liczbe graczy"))
+    LIMIT = int(input("Enter the number of players "))
     start()
     engine()
