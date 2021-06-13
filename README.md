@@ -19,7 +19,7 @@ When the server starts running, you are asked to input number of players in the 
 ![server_screen](https://user-images.githubusercontent.com/72470330/121773796-8b667e80-cb7e-11eb-9bff-3e4846836b0e.png)
 
 After that you need to configure line 11 in client.py - copy there your server's IP.
-Then you have to launch clients and give you name.
+Then you have to launch clients and give your name.
 ![login_client](https://user-images.githubusercontent.com/72470330/121773925-7ccc9700-cb7f-11eb-90ea-b8c90f8bfa95.png)
 When all the players are connected the game stars:
 
